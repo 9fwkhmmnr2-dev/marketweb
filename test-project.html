@@ -1,0 +1,79 @@
+
+
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Prueba de marketWeb</title>
+
+</head>
+
+<body>
+
+  <h1>Prueba de validación</h1>
+
+  <button id="test">Probar endpoint</button>
+
+  <pre id="result">Esperando...</pre>
+
+  <script>
+
+    document.getElementById("test").onclick = async () => {
+
+      const result = document.getElementById("result");
+
+      result.textContent = "Probando...";
+
+      try {
+
+        const response = await fetch(
+
+          "/api/project-validate",
+
+          {
+
+            method: "POST",
+
+            headers: {
+
+              "Content-Type": "application/json"
+
+            },
+
+            body: JSON.stringify({
+
+              title: "Mi primera web",
+
+              html: "<!DOCTYPE html><html><head><title>Prueba</title></head><body><h1>Hola</h1></body></html>"
+
+            })
+
+          }
+
+        );
+
+        result.textContent =
+
+          "HTTP " + response.status + "\n" +
+
+          JSON.stringify(await response.json(), null, 2);
+
+      } catch (error) {
+
+        result.textContent = "Error de conexión: " + error.message;
+
+      }
+
+    };
+
+  </script>
+
+</body>
+
+</html>
