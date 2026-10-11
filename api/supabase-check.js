@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
-  const url = process.env.supabase_url;
+  const url = process.env.SUPABASE_URL;
   const secret = process.env.SUPABASE_SECRET_KEY;
 
   if (!url || !secret) {
