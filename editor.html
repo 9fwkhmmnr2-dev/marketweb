@@ -1252,7 +1252,7 @@ function exportDocument() {
   setTimeout(() => URL.revokeObjectURL(url), 1500); showToast("Descarga iniciada. Abrí el archivo para probar tu página.");
 }
 const modal = $("payModal"), closePay = () => { modal.hidden = true; };
-$("exportBtn").addEventListener("click", () => { deselect(); modal.hidden = false; $("payClose").focus(); });
+$("exportBtn").addEventListener("click", () => { closePay(); exportDocument(); });
 $("payClose").addEventListener("click", closePay);
 modal.addEventListener("click", ev => { if (ev.target === modal) closePay(); });
 document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !modal.hidden) closePay(); });
