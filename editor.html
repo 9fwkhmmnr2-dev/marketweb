@@ -108,7 +108,7 @@ input[type=range]{width:100%;accent-color:#3867FF}
   <button class="ib" id="undoBtn" type="button" aria-label="Deshacer" data-icon="undo" disabled></button>
   <button class="ib" id="redoBtn" type="button" aria-label="Rehacer" data-icon="redo" disabled></button>
   <button class="ib" id="devBtn" type="button" aria-label="Cambiar entre celular y computadora" data-icon="phone"></button>
-  <button class="btn primary" id="exportBtn" type="button"><span class="long">Pagar y </span>descargar</button>
+  <button class="btn primary" id="exportBtn" type="button">Descargar</button>
 </div>
 
 <div class="canvas" id="canvas">
@@ -1232,7 +1232,7 @@ $("resetBtn").addEventListener("click", () => {
   if (!confirm("¿Restablecer la plantilla? Se perderán los cambios.")) return;
   state = clone(defaults); images = { logo:"", hero:"" }; origs = { logo:"", hero:"" }; saveImages(); saveOrigs(); setInputValues(); deselect(); changed(); showToast("Plantilla restablecida.");
 });
-function exportDocument() {
+function buildExportHtml() {
   deselect();
   const c = $("site").cloneNode(true);
   c.querySelectorAll(".site-section[hidden]").forEach(e => e.remove());
@@ -1250,6 +1250,10 @@ function exportDocument() {
   const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<meta name="theme-color" content="' + safeColor(state.darkColor, defaults.darkColor) + '"><meta name="description" content="' + escapeHtml(state.description.trim().slice(0, 160)) + '">' +
     '<title>' + escapeHtml(state.businessName.trim() || "Mi negocio") + '</title><style>' + SITE_CSS + '</style></head><body>' + c.outerHTML + waHtml + bookScript + '</body></html>';
+  return html;
+}
+function exportDocument() {
+  const html = buildExportHtml();
   const url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
   const a = document.createElement("a"); a.href = url; a.download = "mi-pagina-marketweb.html"; document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1500); showToast("Descarga iniciada. Abrí el archivo para probar tu página.");
@@ -1262,10 +1266,28 @@ document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !modal.h
 $("payMP").addEventListener("click", () => showToast("El pago con Mercado Pago se conecta en la etapa del backend."));
 $("paySim").addEventListener("click", () => { closePay(); exportDocument(); });
 
+/* ---------- Puente para la nube (cloud-ui.js) ---------- */
+window.__mwEditor = Object.freeze({
+  commit() { deselect(); flush(); },
+  getProject() { return { app:"marketweb", v:1, state: clone(state), images: { ...images }, origs: { ...origs } }; },
+  buildHtml: buildExportHtml,
+  setProject(d) {
+    if (!isObj(d) || d.app !== "marketweb" || !isObj(d.state)) throw new Error("Formato de proyecto no válido.");
+    const ok = v => typeof v === "string" && /^data:image\/(png|jpeg|webp);base64,/.test(v), im = isObj(d.images) ? d.images : {}, or = isObj(d.origs) ? d.origs : {};
+    deselect(); flush();
+    state = normalizeState(d.state);
+    images = { logo: ok(im.logo) ? im.logo : "", hero: ok(im.hero) ? im.hero : "" };
+    origs = { logo: ok(or.logo) ? or.logo : "", hero: ok(or.hero) ? or.hero : "" };
+    saveImages(); saveOrigs(); setInputValues(); deselect(); changed();
+  },
+  toast: showToast
+});
+
 /* ---------- Inicio ---------- */
 site.querySelectorAll('[data-edit^="t:"]').forEach(e => { TEXT_DEFAULTS[e.dataset.edit.slice(2)] = e.textContent.trim(); });
 setInputValues(); render(); buildCtx(); cur = snap(); btns();
 })();
 </script>
+<script type="module" src="cloud-ui.js"></script>
 </body>
 </html>
