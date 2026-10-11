@@ -1,9 +1,13 @@
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = "https://msxmhgxsjlgfdlhirikj.supabase.co";
+const SUPABASE_URL =
+  "https://msxmhgxsjlgfdlhirikj.supabase.co";
+
 const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_6wS64xCMk4_073N2xbLJ4Q_1GYzALcq";
+
+const MAX_HTML_BYTES = 300000;
+const MAX_PROJECT_BYTES = 5 * 1024 * 1024;
 
 export const supabase = createClient(
   SUPABASE_URL,
@@ -15,15 +19,15 @@ export async function getCurrentUser() {
 
   if (error) throw error;
 
+  if (!data.user) {
+    throw new Error("Iniciá sesión para continuar.");
+  }
+
   return data.user;
 }
 
 export async function listProjects() {
-  const user = await getCurrentUser();
-
-  if (!user) {
-    throw new Error("Iniciá sesión para ver tus proyectos.");
-  }
+  await getCurrentUser();
 
   const { data, error } = await supabase
     .from("mw_projects")
@@ -35,36 +39,79 @@ export async function listProjects() {
   return data;
 }
 
-export async function saveProject({ id, title, html }) {
+export async function saveProject({
+  id,
+  title,
+  html,
+  projectData
+}) {
   const user = await getCurrentUser();
-
-  if (!user) {
-    throw new Error("Iniciá sesión para guardar proyectos.");
-  }
 
   const cleanTitle = String(title || "").trim();
 
   if (!cleanTitle || cleanTitle.length > 80) {
-    throw new Error("El título debe tener entre 1 y 80 caracteres.");
+    throw new Error(
+      "El título debe tener entre 1 y 80 caracteres."
+    );
   }
 
   if (typeof html !== "string" || !html.trim()) {
     throw new Error("El HTML del proyecto está vacío.");
   }
 
-  if (new TextEncoder().encode(html).length > 300000) {
-    throw new Error("El proyecto supera el límite de 300 KB.");
+  if (
+    new TextEncoder().encode(html).length > MAX_HTML_BYTES
+  ) {
+    throw new Error(
+      "El HTML supera el límite actual de 300 KB."
+    );
   }
+
+  if (
+    !projectData ||
+    typeof projectData !== "object" ||
+    Array.isArray(projectData) ||
+    projectData.app !== "marketweb" ||
+    projectData.v !== 1 ||
+    !projectData.state ||
+    typeof projectData.state !== "object" ||
+    Array.isArray(projectData.state)
+  ) {
+    throw new Error(
+      "Los datos del proyecto no tienen el formato esperado."
+    );
+  }
+
+  let serialized;
+
+  try {
+    serialized = JSON.stringify(projectData);
+  } catch {
+    throw new Error("No se pudieron procesar los datos del proyecto.");
+  }
+
+  if (
+    new TextEncoder().encode(serialized).length >
+    MAX_PROJECT_BYTES
+  ) {
+    throw new Error(
+      "El proyecto supera el límite de 5 MB para guardarlo en la nube. Reducí el tamaño de las imágenes."
+    );
+  }
+
+  const payload = {
+    title: cleanTitle,
+    html,
+    project_data: JSON.parse(serialized),
+    updated_at: new Date().toISOString()
+  };
 
   if (id) {
     const { data, error } = await supabase
       .from("mw_projects")
-      .update({
-        title: cleanTitle,
-        html,
-        updated_at: new Date().toISOString()
-      })
+      .update(payload)
       .eq("id", id)
+      .eq("user_id", user.id)
       .select("id, title, created_at, updated_at")
       .single();
 
@@ -76,9 +123,8 @@ export async function saveProject({ id, title, html }) {
   const { data, error } = await supabase
     .from("mw_projects")
     .insert({
-      user_id: user.id,
-      title: cleanTitle,
-      html
+      ...payload,
+      user_id: user.id
     })
     .select("id, title, created_at, updated_at")
     .single();
@@ -93,10 +139,15 @@ export async function loadProject(id) {
     throw new Error("Falta el identificador del proyecto.");
   }
 
+  const user = await getCurrentUser();
+
   const { data, error } = await supabase
     .from("mw_projects")
-    .select("id, title, html, created_at, updated_at")
+    .select(
+      "id, title, html, project_data, created_at, updated_at"
+    )
     .eq("id", id)
+    .eq("user_id", user.id)
     .single();
 
   if (error) throw error;
@@ -109,10 +160,13 @@ export async function deleteProject(id) {
     throw new Error("Falta el identificador del proyecto.");
   }
 
+  const user = await getCurrentUser();
+
   const { error } = await supabase
     .from("mw_projects")
     .delete()
-    .eq("id", id);
+    .eq("id", id)
+    .eq("user_id", user.id);
 
   if (error) throw error;
 }
