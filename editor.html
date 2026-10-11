@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1220">
+<title>marketWeb — Editor</title>
+<style>
+:root{color-scheme:dark;--ink:#F5F7FF;--muted:#A9B4CF;--line:#25324B;--acc:#8BA7FF;--pri:#3867FF;--card:#151F32}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;display:flex;flex-direction:column;height:100dvh;overflow:hidden;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:radial-gradient(900px 420px at 50% -80px,#3867FF40,transparent 70%),#0B1220}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.topbar{flex:none;height:54px;display:flex;align-items:center;gap:6px;padding:0 10px;background:#0B1220e6;border-bottom:1px solid #8BA7FF22}
+.brand{font-weight:800;letter-spacing:-.04em;font-size:18px;text-decoration:none;color:inherit;margin-right:auto}
+.brand span{color:var(--acc);text-shadow:0 0 18px #8BA7FF99}
+.ib{width:38px;height:38px;flex:none;border-radius:10px;border:1px solid #8BA7FF33;background:var(--card);color:var(--ink);font-size:16px;display:grid;place-items:center;text-decoration:none;padding:0}
+.ib:disabled{opacity:.35;cursor:not-allowed}
+.btn{border:1px solid #8BA7FF33;background:var(--card);color:var(--ink);padding:10px 14px;border-radius:10px;font-weight:650;font-size:13px;text-decoration:none;white-space:nowrap}
+.btn.primary{background:linear-gradient(180deg,#5681FF,#3867FF);border-color:#3867FF;color:#fff;box-shadow:inset 0 1px 0 #ffffff55,0 0 22px #3867FF77}
+.btn.danger{border-color:#ff6b8b66;color:#ff9db1}
+.canvas{flex:1;min-height:0;overflow:auto;padding:14px;-webkit-overflow-scrolling:touch;background-image:linear-gradient(#8BA7FF10 1px,transparent 1px),linear-gradient(90deg,#8BA7FF10 1px,transparent 1px);background-size:40px 40px}
+.hint{max-width:560px;margin:0 auto 12px;text-align:center;font-size:12px;color:var(--acc);background:#8BA7FF14;border:1px solid #8BA7FF33;border-radius:99px;padding:8px 14px}
+.preview{position:relative;background:#fff;margin:0 auto;max-width:100%;box-shadow:0 0 0 1px #8BA7FF33,0 0 60px #3867FF40,0 20px 50px #00000080;overflow:hidden;transition:max-width .2s}
+.preview.mobile{max-width:390px;border:6px solid #202938;border-radius:25px}
+.dock{flex:none;background:#0B1220;border-top:1px solid #8BA7FF33;padding-bottom:env(safe-area-inset-bottom);position:relative;z-index:10}
+.tabs,.ctx{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;scrollbar-width:none}
+.tabs::-webkit-scrollbar,.ctx::-webkit-scrollbar{display:none}
+.tab{flex:none;min-width:70px;display:grid;justify-items:center;gap:2px;background:none;border:0;color:var(--muted);font-size:11px;font-weight:650;padding:6px 8px;border-radius:10px}
+.tab i{font-style:normal;font-size:20px}
+.tab[aria-pressed=true]{color:#fff;background:#3867FF44}
+.cbtn{flex:none;display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 13px;border-radius:10px;background:var(--card);border:1px solid #8BA7FF33;color:var(--ink);font-size:13px;font-weight:650;white-space:nowrap}
+.cbtn[aria-pressed=true]{background:#3867FF55;border-color:var(--acc)}
+.cbtn input[type=color]{width:26px;height:26px;border:0;padding:0;background:none}
+.sheet{max-height:42vh;overflow:auto;padding:14px 16px;background:#101a2c;border-bottom:1px solid #8BA7FF22}
+.field{margin:0 0 14px}
+.field label,.lb{display:block;font-size:12px;font-weight:750;margin-bottom:6px}
+.field input[type=text],.field input[type=tel],.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 11px;background:#0B1220;color:var(--ink);outline:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--acc);box-shadow:0 0 0 3px #3867FF55}
+.field textarea{min-height:84px;resize:vertical}
+.intro{font-size:12px;color:var(--muted);line-height:1.5;margin:0 0 10px}
+.colors{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.color-field{border:1px solid var(--line);background:var(--card);padding:9px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700}
+.color-field input{width:34px;height:28px;border:0;padding:0;background:transparent}
+.section-list{display:grid;gap:8px}
+.section-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px}
+.section-name{font-size:12px;font-weight:750;flex:1}.section-name small{display:block;color:var(--muted);font-weight:500;margin-top:2px}
+.mini{width:30px;height:30px;border:1px solid var(--line);background:#0B1220;color:var(--ink);border-radius:7px;font-weight:800}
+.mini:disabled{opacity:.3;cursor:not-allowed}
+.check{display:flex!important;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin-bottom:8px!important}
+.img-slot{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;margin-bottom:10px}
+.img-drop{height:62px;border-radius:10px;background:#2b3345;border:1px dashed #4a5670;color:#8e98ad;font-size:11px;font-weight:700;display:grid;place-items:center;text-align:center;overflow:hidden;padding:4px}
+.img-drop img{width:100%;height:100%;object-fit:contain;display:block}
+.img-btns{display:flex;gap:6px}
+.mini-btn{border:1px solid #8BA7FF33;background:var(--card);color:var(--ink);padding:8px 11px;border-radius:8px;font-size:12px;font-weight:650}
+.mini-btn:disabled{opacity:.4;cursor:not-allowed}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.days label{display:flex;gap:5px;align-items:center;font-size:12px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;background:var(--card);margin:0}
+.toast{position:fixed;bottom:130px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--acc);color:var(--ink);padding:11px 15px;border-radius:10px;font-size:13px;box-shadow:0 5px 20px #0006;z-index:30;max-width:90vw}
+.mw-badge{position:absolute;right:10px;bottom:10px;z-index:3;background:#0B1220e6;color:var(--acc);border:1px solid #8BA7FF55;padding:6px 10px;border-radius:99px;font:700 11px system-ui,sans-serif;box-shadow:0 0 16px #3867FF66}
+.mw-modal{position:fixed;inset:0;z-index:40;background:#050912cc;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px}
+.mw-box{width:100%;max-width:380px;text-align:center;background:linear-gradient(160deg,#1b2842,#151F32 60%);border:1px solid #8BA7FF55;border-radius:18px;padding:26px;box-shadow:0 0 60px #3867FF55,inset 0 1px 0 #ffffff1f;display:grid;gap:10px}
+.mw-box h3{margin:0;font-size:20px}.mw-box p{margin:0;color:var(--muted);font-size:13px}
+.mw-price{font-size:40px;font-weight:800;letter-spacing:-.04em;text-shadow:0 0 28px #8BA7FF88}
+.mw-close{background:none;border:0;color:var(--acc);font-weight:650;font-size:13px;padding:6px}
+/* selección sobre la página */
+.site{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.site [data-edit],.site [data-img],.site [data-section]{cursor:pointer}
+.mw-sel{outline:2px solid #3867FF!important;outline-offset:3px;border-radius:3px}
+.site-section.mw-sel{outline-offset:-3px}
+.mw-editing{outline:2px dashed #8BA7FF!important;outline-offset:3px;-webkit-user-select:text;user-select:text;cursor:text;min-width:24px}
+.book-box select,.book-box input,.slot,.book-form .site-button{pointer-events:none}
+.book-box [data-edit]{pointer-events:auto}
+.preview .wa-float{position:absolute;bottom:52px}
+@media(max-width:640px){.long{display:none}.brand{display:none}.topbar .ib:first-child{margin-right:auto}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.btn,.cbtn,.mini-btn{display:inline-flex;align-items:center;gap:7px}
+.ib svg{display:block}
+input[type=range]{width:100%;accent-color:#3867FF}
+.field.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.field.row label{margin:0}.field.row input[type=color]{width:46px;height:30px;border:0;padding:0;background:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border:1px solid #8BA7FF33;background:var(--card);color:var(--ink);padding:8px 13px;border-radius:99px;font-size:13px;font-weight:650}
+.chip[aria-pressed=true]{background:var(--pri);border-color:var(--pri);color:#fff}
+.ied{position:fixed;inset:0;z-index:50;background:#0B1220;display:flex;flex-direction:column}
+.ied-top{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid #8BA7FF22}
+.ied-stage{flex:1;min-height:0;display:grid;place-items:center;overflow:hidden;background:#0a0f1a}
+.ied-wrap{position:relative;line-height:0}
+#iedCanvas{display:block;background:#1b2842}
+.crop{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px #000a;touch-action:none;cursor:move}
+.crop i{position:absolute;width:26px;height:26px;background:#fff;border-radius:50%;border:3px solid #3867FF}
+.crop i[data-h=nw]{left:-14px;top:-14px}.crop i[data-h=ne]{right:-14px;top:-14px}.crop i[data-h=sw]{left:-14px;bottom:-14px}.crop i[data-h=se]{right:-14px;bottom:-14px}
+.ied-panel{flex:none;max-height:36vh;overflow:auto;padding:12px 16px;background:#101a2c;border-top:1px solid #8BA7FF22}
+.ied-tabs{flex:none;background:#0B1220;border-top:1px solid #8BA7FF33;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}
+.elgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:8px}
+.elgrid button{aspect-ratio:1;border:1px solid #8BA7FF33;background:var(--card);color:var(--ink);border-radius:10px;display:grid;place-items:center;padding:12px}
+.elgrid button:hover{border-color:var(--acc)}.elgrid svg{width:100%;height:auto;display:block}
+.site [data-el]{cursor:pointer}
+</style>
+<style id="siteCss"></style>
+</head>
+<body>
+<div class="topbar">
+  <a class="ib" href="index.html" aria-label="Volver a las plantillas" data-icon="back"></a>
+  <a class="brand" href="index.html">market<span>Web</span></a>
+  <button class="ib" id="undoBtn" type="button" aria-label="Deshacer" data-icon="undo" disabled></button>
+  <button class="ib" id="redoBtn" type="button" aria-label="Rehacer" data-icon="redo" disabled></button>
+  <button class="ib" id="devBtn" type="button" aria-label="Cambiar entre celular y computadora" data-icon="phone"></button>
+  <button class="btn primary" id="exportBtn" type="button"><span class="long">Pagar y </span>descargar</button>
+</div>
+
+<div class="canvas" id="canvas">
+  <div class="hint" id="hint">Tocá un texto, una imagen o una sección para editarla. Tocá de nuevo un texto para escribir.</div>
+  <div class="preview" id="preview"><div class="mw-badge">Vista gratuita · Hecho con marketWeb</div>
+    <div class="site" id="site">
+      <header class="site-nav site-section" data-section="nav">
+        <div class="site-logo"><img hidden alt="" data-img="logo"><span data-bind="name" data-edit="b:businessName"></span> <b>®</b></div>
+        <a class="nav-link" href="#contact" data-edit="t:nav.link">CONTACTO ↗</a>
+      </header>
+      <section class="hero site-section" data-section="hero">
+        <div>
+          <div class="kicker" data-edit="t:hero.kicker">BARBERÍA · ESTILO · DETALLE</div>
+          <h1 data-bind="tagline" data-edit="b:tagline"></h1>
+          <p data-bind="description" data-edit="b:description"></p>
+          <a class="site-button" data-action="booking" href="#contact" data-edit="t:hero.btn">CONSULTAR TURNO</a>
+        </div>
+        <div class="hero-art" aria-label="Ilustración de barbería" data-img="hero"><img class="hero-photo" hidden alt="">
+          <div class="art-text"><div class="scissors">✂</div><strong data-bind="shortName"></strong><span>BARBER CLUB</span></div>
+        </div>
+      </section>
+      <section class="services site-section" data-section="services">
+        <div class="section-heading"><span data-edit="t:svc.k">NUESTRO TRABAJO</span><h2 data-edit="t:svc.h">Servicios</h2></div>
+        <div class="service-grid" id="serviceGrid"></div>
+      </section>
+      <section class="booking site-section" data-section="booking" id="turnos">
+        <div class="section-heading"><span data-edit="t:bk.k">RESERVÁ</span><h2 data-edit="t:bk.h">Pedí tu turno</h2></div>
+        <div class="book-box" data-preview="1">
+          <div class="book-form" data-bk="form">
+            <label>Servicio<select data-bk="service"></select></label>
+            <label>Día<select data-bk="day"></select></label>
+            <div class="slot-label">Horario</div><div class="slots" data-bk="slots"></div>
+            <label>Tu nombre<input data-bk="name" type="text" maxlength="40" autocomplete="name"></label>
+            <button type="button" class="site-button" data-bk="send"><span data-edit="t:bk.send">PEDIR TURNO POR WHATSAPP</span></button>
+            <p class="book-note">El turno queda sujeto a confirmación por WhatsApp.</p>
+          </div>
+          <p class="book-note" data-bk="msg" role="status"></p>
+          <a class="book-ext" data-bk="ext" hidden target="_blank" rel="noopener noreferrer">Reservar en agenda online ↗</a>
+        </div>
+      </section>
+      <section class="hours site-section" data-section="hours">
+        <div class="section-heading"><span data-edit="t:hr.k">TE ESPERAMOS</span><h2 data-edit="t:hr.h">Horarios</h2></div>
+        <div class="hours-box" id="hoursBox"></div>
+      </section>
+      <section class="contact site-section" data-section="contact" id="contact">
+        <div class="section-heading"><span data-edit="t:ct.k">EL PRÓXIMO PASO</span><h2 data-edit="t:ct.h">¿Renovamos tu estilo?</h2></div>
+        <p data-edit="t:ct.p">Escribinos para consultar disponibilidad y coordinar tu turno.</p>
+        <a class="site-button" data-action="booking" href="#contact" data-edit="t:ct.btn">CONSULTAR POR WHATSAPP</a>
+      </section>
+      <footer class="site-footer site-section" data-section="footer">
+        © <span data-bind="year"></span> <span data-bind="name" data-edit="b:businessName"></span>. Todos los derechos reservados.
+      </footer>
+      <a class="wa-float" data-action="booking" href="#contact" aria-label="Escribir por WhatsApp" hidden>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg><span>WhatsApp</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="dock">
+  <div class="sheet" id="sheet" hidden>
+    <div class="sg" data-tab="ctx" id="ctxPanel" hidden></div>
+    <div class="sg" data-tab="colores" hidden>
+      <p class="intro">Colores de toda la página. Para el fondo de una sección, tocala en la página.</p>
+      <div class="colors">
+        <div class="color-field"><span>Principal</span><input id="primaryColor" type="color" aria-label="Color principal"></div>
+        <div class="color-field"><span>Fondo</span><input id="backgroundColor" type="color" aria-label="Color de fondo"></div>
+        <div class="color-field"><span>Texto</span><input id="textColor" type="color" aria-label="Color de texto"></div>
+        <div class="color-field"><span>Oscuro</span><input id="darkColor" type="color" aria-label="Color oscuro"></div>
+      </div>
+    </div>
+    <div class="sg" data-tab="fuente" hidden>
+      <div class="field"><label for="fontPair">Tipografía de toda la página</label>
+        <select id="fontPair"><option value="clasica">Clásica (serif + sans)</option><option value="moderna">Moderna (sans)</option><option value="elegante">Elegante (serif)</option><option value="fuerte">Fuerte (negrita impactante)</option></select></div>
+      <p class="intro">Para cambiar la fuente de un solo texto, tocalo en la página y elegí «Fuente».</p>
+    </div>
+    <div class="sg" data-tab="imagenes" hidden>
+      <div class="img-slot"><div class="img-drop" id="drop-logo"></div><div class="img-btns"><button class="mini-btn" id="up-logo" type="button">Subir</button><button class="mini-btn" id="rm-logo" type="button">Quitar</button></div></div>
+      <div class="img-slot"><div class="img-drop" id="drop-hero"></div><div class="img-btns"><button class="mini-btn" id="up-hero" type="button">Subir</button><button class="mini-btn" id="rm-hero" type="button">Quitar</button></div></div>
+      <p class="intro">PNG, JPG o WebP. También podés tocar el logo o la foto en la página.</p>
+    </div>
+    <div class="sg" data-tab="elementos" hidden>
+      <div class="field"><label for="elSec">Agregar en</label><select id="elSec"><option value="hero">Portada</option><option value="services">Servicios</option><option value="booking">Turnos</option><option value="hours">Horarios</option><option value="contact">Contacto</option><option value="footer">Pie de página</option></select></div>
+      <div class="field row"><label for="elColor">Color inicial</label><input type="color" id="elColor" value="#b88a55"></div>
+      <div class="elgrid" id="elGrid"></div>
+      <div style="height:12px"></div>
+      <button class="btn" id="elUpload" type="button" data-icon="open">Cargar imagen propia</button>
+      <p class="intro" style="margin-top:10px">Tocá un elemento para agregarlo. Después tocalo en la página para cambiar su color, tamaño y posición.</p>
+    </div>
+    <div class="sg" data-tab="secciones" hidden>
+      <div class="section-list" id="sectionList"></div>
+      <div style="height:12px"></div>
+      <label class="check"><input type="checkbox" id="showNav"> Mostrar barra superior</label>
+      <label class="check"><input type="checkbox" id="showFooter"> Mostrar pie de página</label>
+      <label class="check"><input type="checkbox" id="showWhats"> Botón flotante de WhatsApp (si cargaste tu número)</label>
+    </div>
+    <div class="sg" data-tab="servicios" hidden>
+      <div class="field"><label for="servicesText">Servicios (nombre | precio | detalle, uno por línea)</label><textarea id="servicesText"></textarea></div>
+      <button class="btn" id="addService" type="button" data-icon="plus">Agregar servicio</button>
+      <p class="intro" style="margin-top:10px">También podés tocar cualquier texto de un servicio en la página.</p>
+    </div>
+    <div class="sg" data-tab="horarios" hidden>
+      <div class="field"><label for="hoursText">Horarios (día | horario, uno por línea)</label><textarea id="hoursText"></textarea></div>
+    </div>
+    <div class="sg" data-tab="turnos" hidden>
+      <div class="field"><span class="lb">Días de atención</span><div class="days">
+        <label><input type="checkbox" id="bd1"> L</label><label><input type="checkbox" id="bd2"> M</label><label><input type="checkbox" id="bd3"> X</label>
+        <label><input type="checkbox" id="bd4"> J</label><label><input type="checkbox" id="bd5"> V</label><label><input type="checkbox" id="bd6"> S</label><label><input type="checkbox" id="bd0"> D</label></div></div>
+      <div class="field"><label for="bookSlots">Horarios para turnos (separados por coma)</label><input id="bookSlots" type="text" maxlength="200"></div>
+      <div class="field"><label for="bookLink">Enlace a agenda externa (opcional)</label><input id="bookLink" type="text" maxlength="200" placeholder="https://..."></div>
+    </div>
+    <div class="sg" data-tab="ajustes" hidden>
+      <div class="field"><label for="businessName">Nombre del negocio</label><input id="businessName" type="text" maxlength="70"></div>
+      <div class="field"><label for="whatsapp">WhatsApp (código de país, solo números)</label><input id="whatsapp" type="tel" inputmode="numeric" maxlength="16" placeholder="5492211234567"></div>
+      <button class="btn" id="saveProj" type="button" data-icon="save">Guardar proyecto (archivo)</button>
+      <div style="height:10px"></div>
+      <button class="btn" id="openProj" type="button" data-icon="open">Abrir proyecto</button>
+      <p class="intro" style="margin:8px 0 14px">El archivo guarda todo: textos, estilos, fotos y elementos.</p>
+      <button class="btn" id="showHidden" type="button" data-icon="eyeoff">Mostrar elementos ocultos</button>
+      <div style="height:10px"></div>
+      <button class="btn danger" id="resetBtn" type="button" data-icon="reset">Restablecer plantilla</button>
+    </div>
+  </div>
+  <div class="tabs" id="tabs" role="toolbar" aria-label="Herramientas"></div>
+  <div class="ctx" id="ctx" role="toolbar" aria-label="Herramientas del elemento" hidden></div>
+</div>
+
+<div class="mw-modal" id="payModal" hidden role="dialog" aria-modal="true" aria-labelledby="payTitle"><div class="mw-box">
+  <h3 id="payTitle">Descargá tu página</h3><p>Plantilla Barbería · pago único</p><div class="mw-price">US$ 0,90</div>
+  <p>Incluye el archivo HTML de tu página, sin la marca de marketWeb.</p>
+  <button class="btn primary" id="payMP" type="button">Pagar con Mercado Pago</button>
+  <button class="btn" id="paySim" type="button">Simular pago (solo pruebas)</button>
+  <button class="mw-close" id="payClose" type="button">Seguir editando</button>
+</div></div>
+<div class="ied" id="ied" hidden role="dialog" aria-modal="true" aria-label="Editar imagen">
+  <div class="ied-top"><button class="btn" id="iedCancel" type="button">Cancelar</button><strong>Editar imagen</strong><button class="btn primary" id="iedApply" type="button">Aplicar</button></div>
+  <div class="ied-stage" id="iedStage"><div class="ied-wrap" id="iedWrap"><canvas id="iedCanvas"></canvas><div class="crop" id="cropBox" hidden><i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i></div></div></div>
+  <div class="ied-panel" id="iedPanel"></div>
+  <div class="ied-tabs tabs" id="iedTabs"></div>
+</div>
+<div class="toast" id="toast" hidden></div>
+<input type="file" id="file-logo" accept="image/png,image/jpeg,image/webp" hidden>
+<input type="file" id="file-hero" accept="image/png,image/jpeg,image/webp" hidden>
+<input type="file" id="file-el" accept="image/png,image/jpeg,image/webp" hidden>
+<input type="file" id="file-proj" accept="application/json,.json" hidden>
+<div hidden><input id="tagline" type="text"><textarea id="description"></textarea></div>
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+const STORAGE_KEY = "moldeweb-editor-v1", IMG_KEY = "marketweb-images-v1", ORIG_KEY = "marketweb-origs-v1";
+const SITE_CSS = `
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0}
+.site{container-type:inline-size;color:var(--text);background:var(--background);font-family:var(--font-body)}
+.site h1,.site h2,.site h3,.site-logo,.art-text strong{font-family:var(--font-head)}
+.site-section[hidden]{display:none!important}
+.site-nav{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:20px 5%;border-bottom:1px solid #0002}
+.site-logo{font-size:16px;font-weight:900;letter-spacing:.04em}
+.site-logo b{color:var(--primary)}
+.nav-link{font-size:12px;font-weight:700;color:var(--text);text-decoration:none}
+.hero{padding:76px 8%;display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;background:var(--background)}
+.kicker{font-size:11px;letter-spacing:.17em;text-transform:uppercase;font-weight:800;color:var(--primary)}
+.hero h1{font-size:clamp(34px,7cqw,62px);line-height:.99;letter-spacing:-.04em;margin:15px 0}
+.hero p,.contact p{line-height:1.7;opacity:.78;font-size:15px;max-width:510px}
+.contact p{margin-left:auto;margin-right:auto}
+.site-button{display:inline-block;background:var(--primary);color:#fff;text-decoration:none;padding:13px 18px;border-radius:4px;font-size:12px;font-weight:800;letter-spacing:.03em}
+.hero-art{min-height:280px;background:var(--dark);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#f8f5f0;text-align:center;padding:25px;position:relative;overflow:hidden}
+.hero-art::before,.hero-art::after{content:"";position:absolute;border:1px solid #ffffff20;border-radius:50%;width:220px;height:220px}
+.hero-art::after{width:160px;height:160px}
+.art-text{position:relative;z-index:1}
+.scissors{font-size:45px}
+.art-text strong{display:block;font-size:25px;letter-spacing:.12em;margin-top:12px}
+.art-text span{font-size:10px;letter-spacing:.2em}
+img[hidden]{display:none!important}
+.wa-float{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:8px;background:#25D366;color:#fff;text-decoration:none;font:700 13px Arial,Helvetica,sans-serif;padding:12px 16px;border-radius:99px;box-shadow:0 6px 20px #0005}
+.wa-float[hidden]{display:none!important}
+.booking{padding:58px 8%}
+.book-box{max-width:520px;margin:0 auto;display:grid;gap:12px;text-align:left;color-scheme:light}
+.book-form{display:grid;gap:12px}
+.book-box label{display:grid;gap:6px;font-size:12px;font-weight:700}
+.book-box select,.book-box input{font:inherit;font-size:14px;padding:11px 12px;border:1px solid #0003;border-radius:6px;background:#ffffffb0;color:var(--text)}
+.slot-label{font-size:12px;font-weight:700}
+.slots{display:flex;flex-wrap:wrap;gap:8px}
+.slot{font:inherit;font-size:13px;font-weight:700;padding:9px 13px;border-radius:6px;border:1px solid #0003;background:#ffffff80;color:var(--text);cursor:pointer}
+.slot[aria-pressed=true]{background:var(--primary);color:#fff;border-color:var(--primary)}
+.book-form .site-button{border:0;cursor:pointer;justify-self:start}
+.book-note{font-size:12px;opacity:.7;margin:0}
+.book-ext{justify-self:start;font-size:13px;font-weight:700;color:var(--primary)}
+.book-form[hidden],.book-ext[hidden]{display:none!important}
+@container (max-width:650px){.booking{padding:42px 7%}}
+.el{grid-column:1/-1;display:flex;margin:14px 0}
+.el svg,.el img{display:block;max-width:100%;height:auto}
+.site-logo{display:flex;align-items:center;gap:6px}
+.site-logo img{display:block;max-height:38px;max-width:170px;object-fit:contain}
+.site-logo.has-img span,.site-logo.has-img b{display:none}
+.hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero-art.has-photo .art-text{display:none}
+.hero-art.has-photo::before,.hero-art.has-photo::after{display:none}
+.services,.hours,.contact{padding:58px 8%}
+.section-heading{text-align:center;margin-bottom:28px}
+.section-heading span{font-size:10px;letter-spacing:.17em;text-transform:uppercase;font-weight:800;color:var(--primary)}
+.section-heading h2{font-size:32px;letter-spacing:-.03em;margin:9px 0}
+.service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.service-card{border:1px solid #0002;padding:22px;border-radius:5px;background:#ffffff80}
+.service-card h3{font-size:16px;margin:0 0 10px}
+.service-card p{font-size:12px;line-height:1.6;opacity:.75;min-height:38px}
+.price{font-size:20px;font-weight:900;color:var(--primary)}
+.hours{background:color-mix(in srgb,var(--primary) 12%,var(--background))}
+.hours-box{max-width:620px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hour-line{display:flex;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid #0002;font-size:13px}
+.contact{text-align:center}
+.contact .site-button{margin-top:10px}
+.site-footer{padding:20px 8%;font-size:11px;text-align:center;background:var(--dark);color:#fff}
+@container (max-width:650px){
+.hero{padding:42px 7%;grid-template-columns:1fr}
+.hero-art{min-height:190px}
+.service-grid{grid-template-columns:1fr}
+.services,.hours,.contact{padding:42px 7%}
+.hours-box{grid-template-columns:1fr}
+}`;
+$("siteCss").textContent = SITE_CSS;
+
+const FONTS = {
+  clasica:  { head: 'Georgia,"Times New Roman",serif', body: 'Arial,Helvetica,sans-serif' },
+  moderna:  { head: 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', body: 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif' },
+  elegante: { head: '"Palatino Linotype",Palatino,"Book Antiqua",serif', body: 'Georgia,"Times New Roman",serif' },
+  fuerte:   { head: '"Arial Black","Helvetica Neue",Impact,sans-serif', body: 'Arial,Helvetica,sans-serif' }
+};
+const FONT_NAMES = { clasica:"Clásica", moderna:"Moderna", elegante:"Elegante", fuerte:"Fuerte" };
+const SLOTS = [{ key:"logo", label:"Logo", max:400, alpha:true }, { key:"hero", label:"Foto principal", max:1200, alpha:false }];
+const TABS = [["colores","palette","Colores"],["fuente","type","Fuente"],["imagenes","image","Imágenes"],["elementos","shapes","Elementos"],["secciones","layers","Secciones"],
+  ["servicios","scissors","Servicios"],["horarios","clock","Horarios"],["turnos","calendar","Turnos"],["ajustes","gear","Ajustes"]];
+const LABELS = { hero:"Portada", services:"Servicios", booking:"Turnos", hours:"Horarios", contact:"Contacto" };
+const defaults = {
+  businessName:"Norte Barber Club", tagline:"Tu estilo. Tu momento.",
+  description:"Cortes clásicos, estilos actuales y atención al detalle. Reservá tu próximo turno y vení a renovar tu look.",
+  whatsapp:"", fontPair:"clasica", primaryColor:"#b88a55", backgroundColor:"#f8f5f0", textColor:"#1e232b", darkColor:"#202938",
+  servicesText:"Corte clásico | $8.000 | Corte prolijo a tu estilo.\nCorte + barba | $12.000 | Un look completo.\nPerfilado de barba | $5.000 | Detalles y terminación.",
+  hoursText:"Lunes a viernes | 09:00–19:00\nSábado | 09:00–16:00\nDomingo | Cerrado",
+  showNav:true, showFooter:true, showWhats:true,
+  bookSlots:"09:00, 10:00, 11:00, 12:00, 15:00, 16:00, 17:00, 18:00", bookLink:"",
+  bd0:false, bd1:true, bd2:true, bd3:true, bd4:true, bd5:true, bd6:true,
+  texts:{}, styles:{}, secBg:{}, boxes:{}, imgEdits:{}, els:[],
+  sections:[{id:"hero",label:"Portada",visible:true},{id:"services",label:"Servicios",visible:true},{id:"booking",label:"Turnos",visible:true},{id:"hours",label:"Horarios",visible:true},{id:"contact",label:"Contacto",visible:true}]
+};
+const ids = ["businessName","tagline","description","whatsapp","fontPair","primaryColor","backgroundColor","textColor","darkColor","servicesText","hoursText","showNav","showFooter","showWhats","bookSlots","bookLink","bd0","bd1","bd2","bd3","bd4","bd5","bd6"];
+const clone = o => JSON.parse(JSON.stringify(o));
+const isObj = v => v && typeof v === "object" && !Array.isArray(v);
+const HEX = /^#[0-9a-f]{6}$/i;
+const safeColor = (v, f) => HEX.test(v || "") ? v : f;
+const cleanPhone = v => String(v || "").replace(/\D/g, "").slice(0, 16);
+const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+function parseLines(text, n) {
+  return String(text || "").split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => {
+    const p = l.split("|").map(x => x.trim()); return Array.from({ length: n }, (_, i) => p[i] || "");
+  });
+}
+const joinRows = rows => rows.map(r => r.join(" | ")).join("\n");
+
+const nz = (v, a, b, d) => typeof v === "number" && isFinite(v) ? Math.max(a, Math.min(b, v)) : d;
+const EL_SECS = ["hero","services","booking","hours","contact","footer"];
+const ELIB = [
+  ["rect","Rectángulo","f",'<rect x="2" y="5" width="20" height="14" rx="2"/>'],
+  ["circle","Círculo","f",'<circle cx="12" cy="12" r="10"/>'],
+  ["triangle","Triángulo","f",'<path d="M12 3 22 21H2z"/>'],
+  ["star","Estrella","f",'<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/>'],
+  ["heart","Corazón","f",'<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/>'],
+  ["arrow","Flecha","f",'<path d="M4 10h10V5l8 7-8 7v-5H4z"/>'],
+  ["bolt","Rayo","f",'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>'],
+  ["crown","Corona","f",'<path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/>'],
+  ["bubble","Globo de texto","f",'<path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>'],
+  ["line","Línea","f",'<rect x="1" y="11" width="22" height="2" rx="1"/>'],
+  ["scissors","Tijera","s",'<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8 7.5 20 18M8 16.5 20 6"/>'],
+  ["comb","Peine","s",'<path d="M3 7h18v5H3zM5 12v6M8.5 12v6M12 12v6M15.5 12v6M19 12v6"/>'],
+  ["pole","Poste de barbero","s",'<rect x="8" y="3" width="8" height="18" rx="2"/><path d="M8 8l8-3M8 13l8-4M8 18l8-4"/>'],
+  ["pin","Ubicación","s",'<path d="M12 22s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>'],
+  ["check","Check","s",'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>']
+];
+function normEls(a) {
+  if (!Array.isArray(a)) return [];
+  return a.filter(e => e && typeof e === "object" && /^e\d{1,6}$/.test(e.id)).slice(0, 30).map(e => ({
+    id: e.id, t: (e.t === "img" || ELIB.some(x => x[0] === e.t)) ? e.t : "rect", c: safeColor(e.c, "#b88a55"), w: nz(e.w, 16, 600, 80),
+    a: ["left","center","right"].includes(e.a) ? e.a : "center", s: EL_SECS.includes(e.s) ? e.s : "hero",
+    src: (typeof e.src === "string" && /^data:image\/(png|jpeg|webp);base64,/.test(e.src) && e.src.length < 900000) ? e.src : ""
+  })).filter(e => e.t !== "img" || e.src);
+}
+let state = loadState(), images = loadImages(), origs = loadOrigs(), toastTimer, sel = null, editing = null, ctxSub = null, activeTab = null;
+const TEXT_DEFAULTS = {};
+
+function loadState() { try { return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}")); } catch (_) { return clone(defaults); } }
+function normalizeState(saved) {
+  try {
+    const r = { ...clone(defaults), ...(isObj(saved) ? saved : {}) };
+    if (!FONTS[r.fontPair]) r.fontPair = "clasica";
+    ["texts","styles","secBg","boxes","imgEdits"].forEach(k => { if (!isObj(r[k])) r[k] = {}; });
+    r.els = normEls(r.els);
+    r.sections = (Array.isArray(r.sections) ? r.sections : []).filter(s => s && LABELS[s.id]).map(s => ({ id:s.id, label:LABELS[s.id], visible:s.visible !== false }));
+    for (const s of defaults.sections) if (!r.sections.some(i => i.id === s.id)) r.sections.push({ ...s });
+    return r;
+  } catch (_) { return clone(defaults); }
+}
+function persist() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
+function loadImages() {
+  try {
+    const r = JSON.parse(localStorage.getItem(IMG_KEY) || "{}");
+    const ok = v => typeof v === "string" && /^data:image\/(png|jpeg|webp);base64,/.test(v);
+    return { logo: ok(r.logo) ? r.logo : "", hero: ok(r.hero) ? r.hero : "" };
+  } catch (_) { return { logo:"", hero:"" }; }
+}
+function saveImages() {
+  try { localStorage.setItem(IMG_KEY, JSON.stringify(images)); }
+  catch (_) { showToast("La imagen es muy pesada para guardarse en el borrador. Se verá y se exportará, pero no se conservará al cerrar la pestaña."); }
+}
+function loadOrigs() {
+  try {
+    const r = JSON.parse(localStorage.getItem(ORIG_KEY) || "{}"), ok = v => typeof v === "string" && /^data:image\/(png|jpeg|webp);base64,/.test(v);
+    return { logo: ok(r.logo) ? r.logo : "", hero: ok(r.hero) ? r.hero : "" };
+  } catch (_) { return { logo:"", hero:"" }; }
+}
+function saveOrigs() { try { localStorage.setItem(ORIG_KEY, JSON.stringify(origs)); } catch (_) {} }
+function showToast(msg) {
+  const e = $("toast"); e.textContent = msg; e.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { e.hidden = true; }, 3500);
+}
+
+/* ---------- Deshacer / rehacer ---------- */
+let undo = [], redo = [], cur = null, ht;
+const snap = () => ({ s: JSON.stringify(state), i: { ...images }, o: { ...origs } });
+function btns() { $("undoBtn").disabled = !undo.length; $("redoBtn").disabled = !redo.length; }
+function flush() {
+  clearTimeout(ht); const n = snap(); if (!cur) cur = n;
+  if (n.s !== cur.s || n.i.logo !== cur.i.logo || n.i.hero !== cur.i.hero || n.o.logo !== cur.o.logo || n.o.hero !== cur.o.hero) { undo.push(cur); if (undo.length > 40) undo.shift(); redo = []; cur = n; }
+  btns();
+}
+const checkpoint = () => { clearTimeout(ht); ht = setTimeout(flush, 350); };
+function restore(n) { cur = n; state = JSON.parse(n.s); images = { ...n.i }; origs = { ...n.o }; saveImages(); saveOrigs(); setInputValues(); deselect(); render(); btns(); }
+function changed() { render(); checkpoint(); }
+$("undoBtn").addEventListener("click", () => { flush(); if (!undo.length) return; const p = undo.pop(); redo.push(cur); restore(p); });
+$("redoBtn").addEventListener("click", () => { flush(); if (!redo.length) return; const n = redo.pop(); undo.push(cur); restore(n); });
+
+/* ---------- Imágenes ---------- */
+function processImage(file, maxSide, keepAlpha) {
+  return new Promise((resolve, reject) => {
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return reject(new Error("Formato no válido. Usá PNG, JPG o WebP."));
+    if (file.size > 8 * 1024 * 1024) return reject(new Error("La imagen pesa más de 8 MB."));
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const r = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(img.width * r));
+      c.height = Math.max(1, Math.round(img.height * r));
+      const ctx = c.getContext("2d");
+      if (!keepAlpha) { ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height); }
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      resolve(keepAlpha ? c.toDataURL("image/png") : c.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("No se pudo leer la imagen.")); };
+    img.src = url;
+  });
+}
+
+function renderSlots() {
+  SLOTS.forEach(s => {
+    const box = $("drop-" + s.key); box.replaceChildren();
+    if (images[s.key]) { const i = document.createElement("img"); i.src = images[s.key]; i.alt = s.label; box.append(i); } else box.textContent = s.label;
+    $("rm-" + s.key).disabled = !images[s.key]; $("up-" + s.key).textContent = images[s.key] ? "Cambiar" : "Subir";
+  });
+}
+function applyImages(name) {
+  const site = $("site"), logoBox = site.querySelector(".site-logo"), logo = logoBox.querySelector("img");
+  const art = site.querySelector(".hero-art"), photo = art.querySelector(".hero-photo");
+  if (images.logo) { logo.src = images.logo; logo.alt = name; logo.hidden = false; logoBox.classList.add("has-img"); }
+  else { logo.removeAttribute("src"); logo.hidden = true; logoBox.classList.remove("has-img"); }
+  if (images.hero) { photo.src = images.hero; photo.alt = "Foto de " + name; photo.hidden = false; art.classList.add("has-photo"); }
+  else { photo.removeAttribute("src"); photo.hidden = true; art.classList.remove("has-photo"); }
+}
+SLOTS.forEach(s => {
+  $("up-" + s.key).addEventListener("click", () => $("file-" + s.key).click());
+  $("rm-" + s.key).addEventListener("click", () => removeImage(s.key));
+  $("file-" + s.key).addEventListener("change", async ev => {
+    const f = ev.target.files[0]; ev.target.value = ""; if (!f) return;
+    try { images[s.key] = await processImage(f, s.max, s.alpha); origs[s.key] = await processImage(f, s.key === "hero" ? 1600 : 800, s.alpha); delete state.imgEdits[s.key]; saveImages(); saveOrigs(); changed(); buildCtx(); }
+    catch (err) { showToast(err.message); }
+  });
+});
+
+/* ---------- Turnos ---------- */
+function bookingInit(box) {
+  var q = function (k) { return box.querySelector('[data-bk="' + k + '"]'); };
+  var days = (box.dataset.days || "").split(",").filter(function (x) { return x !== ""; }).map(Number);
+  var slots = (box.dataset.slots || "").split(",").filter(Boolean);
+  var phone = box.dataset.phone || "", biz = box.dataset.biz || "", link = box.dataset.link || "";
+  var preview = box.dataset.preview === "1";
+  var form = q("form"), daySel = q("day"), slotBox = q("slots"), send = q("send"), ext = q("ext"), msg = q("msg");
+  var names = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  var picked = "";
+  var clear = function (n) { while (n.firstChild) n.removeChild(n.firstChild); };
+  clear(daySel); clear(slotBox);
+  var today = new Date(), count = 0;
+  for (var i = 0; i < 28 && count < 14; i++) {
+    var x = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+    if (days.indexOf(x.getDay()) < 0) continue;
+    var o = document.createElement("option");
+    o.value = o.textContent = names[x.getDay()] + " " + x.getDate() + "/" + (x.getMonth() + 1);
+    daySel.appendChild(o); count++;
+  }
+  slots.forEach(function (s) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "slot"; b.textContent = s; b.setAttribute("aria-pressed", "false");
+    b.onclick = function () {
+      picked = s; msg.textContent = "";
+      Array.prototype.forEach.call(slotBox.children, function (c) { c.setAttribute("aria-pressed", String(c === b)); });
+    };
+    slotBox.appendChild(b);
+  });
+  ext.hidden = !link; if (link) ext.href = link;
+  form.hidden = !phone;
+  msg.textContent = (!phone && preview) ? "Cargá tu WhatsApp en el editor para activar el pedido de turnos." : "";
+  send.onclick = function () {
+    var name = (q("name").value || "").trim();
+    if (!daySel.value || !picked) { msg.textContent = "Elegí un día y un horario."; return; }
+    var text = "Hola, soy " + (name || "un cliente") + ". Quisiera pedir turno en " + biz + ": " + q("service").value + ", " + daySel.value + " a las " + picked + ".";
+    window.open("https://wa.me/" + phone + "?text=" + encodeURIComponent(text), "_blank", "noopener");
+  };
+}
+function safeLink(v) {
+  try { const u = new URL(String(v || "").trim()); return /^https?:$/.test(u.protocol) ? u.href : ""; }
+  catch (_) { return ""; }
+}
+
+function renderBooking(name) {
+  const box = $("site").querySelector(".book-box"); if (!box) return;
+  const slots = String(state.bookSlots || "").split(/[,\n]/).map(s => s.trim()).filter(s => /^\d{1,2}:\d{2}$/.test(s)).slice(0, 16);
+  box.dataset.biz = name; box.dataset.phone = cleanPhone(state.whatsapp);
+  box.dataset.days = [0,1,2,3,4,5,6].filter(d => state["bd" + d]).join(",");
+  box.dataset.slots = slots.join(","); box.dataset.link = safeLink(state.bookLink);
+  const sel2 = box.querySelector('[data-bk="service"]'); sel2.replaceChildren();
+  parseLines(state.servicesText, 3).slice(0, 12).forEach(([n, p]) => {
+    const o = document.createElement("option"); o.value = n || "Servicio"; o.textContent = (n || "Servicio") + (p ? " — " + p : ""); sel2.append(o);
+  });
+  bookingInit(box);
+}
+
+/* ---------- Dibujo de la página ---------- */
+function renderServices() {
+  const grid = $("serviceGrid"); grid.replaceChildren();
+  const rows = parseLines(state.servicesText, 3).slice(0, 12);
+  if (!rows.length) { const p = document.createElement("p"); p.textContent = "Agregá servicios desde la pestaña Servicios."; grid.append(p); return; }
+  rows.forEach(([name, price, detail], i) => {
+    const card = document.createElement("article"); card.className = "service-card"; card.dataset.row = "s:" + i;
+    const h = document.createElement("h3"); h.textContent = name || "Servicio"; h.dataset.edit = "s:" + i + ":0";
+    const d = document.createElement("p"); d.textContent = detail || "Detalle"; d.dataset.edit = "s:" + i + ":2";
+    const pr = document.createElement("div"); pr.className = "price"; pr.textContent = price || "Consultar"; pr.dataset.edit = "s:" + i + ":1";
+    card.append(h, d, pr); grid.append(card);
+  });
+}
+function renderHours() {
+  const box = $("hoursBox"); box.replaceChildren();
+  const rows = parseLines(state.hoursText, 2).slice(0, 14);
+  if (!rows.length) { const p = document.createElement("p"); p.textContent = "Agregá horarios desde la pestaña Horarios."; box.append(p); return; }
+  rows.forEach(([day, hour], i) => {
+    const line = document.createElement("div"); line.className = "hour-line"; line.dataset.row = "h:" + i;
+    const a = document.createElement("strong"); a.textContent = day || "Día"; a.dataset.edit = "h:" + i + ":0";
+    const b = document.createElement("span"); b.textContent = hour || "Consultar"; b.dataset.edit = "h:" + i + ":1";
+    line.append(a, b); box.append(line);
+  });
+}
+function renderSectionsList() {
+  const list = $("sectionList"); list.replaceChildren();
+  state.sections.forEach((s, i) => {
+    const row = document.createElement("div"); row.className = "section-row";
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = s.visible; cb.setAttribute("aria-label", "Mostrar " + s.label);
+    cb.addEventListener("change", () => { s.visible = cb.checked; changed(); });
+    const nm = document.createElement("div"); nm.className = "section-name"; nm.append(document.createTextNode(s.label));
+    const sm = document.createElement("small"); sm.textContent = s.visible ? "Visible" : "Oculta"; nm.append(sm);
+    const mk = (t, d) => { const b = document.createElement("button"); b.className = "mini"; b.type = "button"; b.textContent = t;
+      b.disabled = i + d < 0 || i + d >= state.sections.length; b.addEventListener("click", () => moveSection(i, d)); return b; };
+    row.append(cb, nm, mk("↑", -1), mk("↓", 1)); list.append(row);
+  });
+}
+function moveSection(i, d) {
+  const n = i + d; if (n < 0 || n >= state.sections.length) return;
+  [state.sections[i], state.sections[n]] = [state.sections[n], state.sections[i]]; changed(); buildCtx();
+}
+function styleKey(k) { const p = k.split(":"); return (p[0] === "s" || p[0] === "h") ? p[0] + ":*:" + p[2] : k; }
+function applyStyles() {
+  $("site").querySelectorAll("[data-edit]").forEach(e => {
+    const st = state.styles[styleKey(e.dataset.edit)] || {};
+    e.style.color = HEX.test(st.color || "") ? st.color : "";
+    e.style.fontFamily = FONTS[st.font] ? FONTS[st.font].head : "";
+    e.style.fontSize = (typeof st.size === "number" && st.size >= 8 && st.size <= 120) ? "max(11px,min(" + st.size + "px," + (st.size / 10) + "cqw))" : "";
+    e.style.fontWeight = (st.weight === "400" || st.weight === "800") ? st.weight : "";
+    e.style.textAlign = ["left","center","right"].includes(st.align) ? st.align : "";
+    const ts = []; if (inr(st.tshadow, 1, 3)) ts.push("0 " + st.tshadow * 2 + "px " + st.tshadow * 4 + "px rgba(0,0,0,.45)");
+    if (HEX.test(st.neon || "")) ts.push("0 0 4px " + st.neon, "0 0 12px " + st.neon, "0 0 26px " + st.neon);
+    e.style.textShadow = ts.join(",");
+    if (inr(st.ow, 1, 6)) e.style.setProperty("-webkit-text-stroke", st.ow + "px " + (HEX.test(st.oc || "") ? st.oc : "#000000")); else e.style.removeProperty("-webkit-text-stroke");
+  });
+}
+function setInputValues() {
+  ids.forEach(id => { const e = $(id); if (e.type === "checkbox") e.checked = Boolean(state[id]); else e.value = state[id] ?? ""; });
+}
+function readInputs() {
+  ids.forEach(id => { const e = $(id); state[id] = e.type === "checkbox" ? e.checked : e.value; });
+  state.whatsapp = cleanPhone(state.whatsapp);
+}
+function render() {
+  const site = $("site"), name = state.businessName.trim() || "Tu negocio", font = FONTS[state.fontPair] || FONTS.clasica;
+  site.style.setProperty("--primary", safeColor(state.primaryColor, defaults.primaryColor));
+  site.style.setProperty("--background", safeColor(state.backgroundColor, defaults.backgroundColor));
+  site.style.setProperty("--text", safeColor(state.textColor, defaults.textColor));
+  site.style.setProperty("--dark", safeColor(state.darkColor, defaults.darkColor));
+  site.style.setProperty("--font-head", font.head); site.style.setProperty("--font-body", font.body);
+  const bind = (k, v) => site.querySelectorAll('[data-bind="' + k + '"]').forEach(e => { if (e !== editing) e.textContent = v; });
+  bind("name", name); bind("tagline", state.tagline.trim() || "Tu estilo. Tu momento."); bind("description", state.description.trim());
+  bind("shortName", name.split(/\s+/).slice(0, 2).join(" ").toUpperCase()); bind("year", new Date().getFullYear());
+  site.querySelectorAll('[data-edit^="t:"]').forEach(e => { if (e === editing) return; const k = e.dataset.edit.slice(2); e.textContent = state.texts[k] ?? TEXT_DEFAULTS[k]; });
+  const phone = cleanPhone(state.whatsapp);
+  const url = phone ? "https://wa.me/" + phone + "?text=" + encodeURIComponent("Hola, quisiera consultar por un turno en " + (state.businessName || "este negocio") + ".") : "#contact";
+  site.querySelectorAll('[data-action="booking"]').forEach(e => {
+    e.href = url;
+    if (phone) { e.target = "_blank"; e.rel = "noopener noreferrer"; } else { e.removeAttribute("target"); e.removeAttribute("rel"); }
+  });
+  site.querySelector(".wa-float").hidden = !(state.showWhats && phone);
+  const nav = site.querySelector('[data-section="nav"]'), footer = site.querySelector('[data-section="footer"]');
+  nav.hidden = !state.showNav; footer.hidden = !state.showFooter;
+  const map = new Map([...site.querySelectorAll("[data-section]")].map(e => [e.dataset.section, e]));
+  const frag = document.createDocumentFragment(); frag.append(nav);
+  state.sections.forEach(s => { const e = map.get(s.id); if (e) { e.hidden = !s.visible; frag.append(e); } });
+  frag.append(footer); site.append(frag);
+  map.forEach((e, id) => { e.style.background = HEX.test(state.secBg[id] || "") ? state.secBg[id] : ""; });
+  applyImages(name); renderBooking(name); renderSlots(); renderServices(); renderHours(); renderSectionsList(); renderEls();
+  applyStyles(); applyBoxes(); reselect(); persist();
+}
+
+/* ---------- Selección y edición directa ---------- */
+function elIndexPath(el, root) { const p = []; let n = el; while (n && n !== root) { p.unshift(Array.prototype.indexOf.call(n.parentNode.children, n)); n = n.parentNode; } return n === root ? p : null; }
+function boxKey(el) { const s = el.closest("[data-section]"), root = s || $("site"), p = elIndexPath(el, root); return p ? (s ? s.dataset.section : "root") + ":" + p.join(".") : null; }
+function elByBoxKey(k) {
+  const i = k.indexOf(":"), id = k.slice(0, i), path = k.slice(i + 1);
+  let n = id === "root" ? $("site") : $("site").querySelector('[data-section="' + id + '"]'); if (!n) return null;
+  if (path) for (const x of path.split(".")) { n = n.children[+x]; if (!n) return null; }
+  return n;
+}
+function classify(el) {
+  if (el.dataset.el) return { el, kind:"el", key:el.dataset.el };
+  if (el.dataset.edit !== undefined) return { el, kind:"text", key:el.dataset.edit };
+  if (el.dataset.img) return { el, kind:"img", key:el.dataset.img };
+  if (el.dataset.section) return { el, kind:"sec", key:el.dataset.section };
+  const k = boxKey(el); return k ? { el, kind:"box", key:k } : null;
+}
+function targetOf(node) {
+  if (!node.closest || !node.closest("#site") || node === $("site")) return null;
+  const svg = node.closest("svg"), e = node.closest("[data-edit],[data-img],[data-el]");
+  return classify(e || svg || node);
+}
+function findEl(t) {
+  if (t.kind === "box") return elByBoxKey(t.key);
+  const attr = { text:"data-edit", img:"data-img", el:"data-el" }[t.kind] || "data-section";
+  return $("site").querySelector("[" + attr + '="' + t.key + '"]');
+}
+function parentTarget() { const p = sel && sel.el.parentElement; return !p || p === $("site") ? null : classify(p); }
+function select(t) {
+  if (editing) editing.blur();
+  if (sel && sel.el) sel.el.classList.remove("mw-sel");
+  t.el = findEl(t) || t.el; sel = t; t.el.classList.add("mw-sel"); ctxSub = null;
+  $("hint").hidden = true; openTab(null); buildCtx();
+}
+function deselect() {
+  if (editing) editing.blur();
+  if (sel && sel.el) sel.el.classList.remove("mw-sel");
+  sel = null; ctxSub = null; openTab(null); buildCtx();
+}
+function reselect() {
+  if (!sel) return; const el = findEl(sel);
+  if (el) { sel.el = el; el.classList.add("mw-sel"); } else { sel = null; buildCtx(); }
+}
+function startEdit() {
+  if (!sel || sel.kind !== "text" || editing) return;
+  const el = sel.el; editing = el; el.contentEditable = "true"; el.spellcheck = false; el.classList.add("mw-editing"); el.focus();
+  const r = document.createRange(); r.selectNodeContents(el); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+}
+function endEdit() {
+  const el = editing; if (!el) return; editing = null;
+  el.removeAttribute("contenteditable"); el.classList.remove("mw-editing");
+  const text = el.textContent.replace(/\s+/g, " ").trim().slice(0, 200);
+  commitText(el.dataset.edit, text);
+}
+function commitText(key, text) {
+  if (!text) { render(); return; }
+  const [k, a, b] = key.split(":");
+  if (k === "b") state[a] = text;
+  else if (k === "t") { if (text === TEXT_DEFAULTS[a]) delete state.texts[a]; else state.texts[a] = text; }
+  else if (k === "s" || k === "h") {
+    const field = k === "s" ? "servicesText" : "hoursText", n = k === "s" ? 3 : 2, rows = parseLines(state[field], n);
+    if (rows[+a]) { rows[+a][+b] = text.replace(/[|\n]/g, " ").trim(); state[field] = joinRows(rows); }
+  }
+  setInputValues(); changed();
+}
+const site = $("site");
+site.addEventListener("click", ev => {
+  if (editing && editing.contains(ev.target)) return;
+  ev.preventDefault(); ev.stopPropagation();
+  const t = targetOf(ev.target); if (!t) { deselect(); return; }
+  if (sel && sel.el === t.el && t.kind === "text") { startEdit(); return; }
+  select(t);
+}, true);
+site.addEventListener("focusout", ev => { if (ev.target === editing) endEdit(); });
+site.addEventListener("keydown", ev => { if (editing && (ev.key === "Enter" || ev.key === "Escape")) { ev.preventDefault(); editing.blur(); } });
+site.addEventListener("paste", ev => {
+  if (!editing) return; ev.preventDefault();
+  document.execCommand("insertText", false, (ev.clipboardData.getData("text") || "").replace(/\s+/g, " "));
+});
+$("canvas").addEventListener("click", ev => { if (!ev.target.closest("#site") && !ev.target.closest(".mw-badge")) deselect(); });
+
+/* ---------- Íconos de un solo color ---------- */
+const ICONS = {
+  back:'<path d="m15 5-7 7 7 7"/>', undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-4"/>', redo:'<path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h4"/>',
+  phone:'<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>', monitor:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  palette:'<path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2-.6-1.2.2-2.5 1.5-2.5H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="11" r="1"/>',
+  type:'<path d="M5 7V5h14v2M12 5v14M9 19h6"/>', image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.7"/><path d="m21 16-5.5-5.5L7 19"/>',
+  layers:'<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>', scissors:'<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8 7.5 20 18M8 16.5 20 6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>', plus:'<path d="M12 5v14M5 12h14"/>', minus:'<path d="M5 12h14"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', eyeoff:'<path d="M3 3l18 18"/><path d="M10.5 6.2A9.600 9.600 0 0 1 12 6c6 0 10 6 10 6a17 17 0 0 1-3.300 3.800M6.600 7.600A17 17 0 0 0 2 12s4 7 10 7c1.600 0 3-.4 4.300-1"/>',
+  check:'<path d="m5 12 5 5 9-10"/>', close:'<path d="M6 6l12 12M18 6 6 18"/>', bold:'<path d="M7 4h6a4 4 0 0 1 0 8H7zM7 12h7a4 4 0 0 1 0 8H7z"/>',
+  alignL:'<path d="M4 6h16M4 10h10M4 14h16M4 18h10"/>', alignC:'<path d="M4 6h16M7 10h10M4 14h16M7 18h10"/>', alignR:'<path d="M4 6h16M10 10h10M4 14h16M10 18h10"/>',
+  crop:'<path d="M6 2v15a1 1 0 0 0 1 1h15M2 6h15a1 1 0 0 1 1 1v15"/>', rotate:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
+  flip:'<path d="M12 3v18"/><path d="M8 7 3 12l5 5zM16 7l5 5-5 5z"/>', sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2.500M12 19.500V22M2 12h2.500M19.500 12H22M4.900 4.900l1.800 1.800M17.300 17.300l1.800 1.800M4.900 19.100l1.800-1.800M17.300 6.700l1.800-1.800"/>',
+  blur:'<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7.500" stroke-dasharray="2 3"/>', filter:'<circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/>',
+  sparkle:'<path d="M12 3l1.800 5.200L19 10l-5.200 1.800L12 17l-1.800-5.200L5 10l5.200-1.800z"/>', up:'<path d="m6 14 6-6 6 6"/>', down:'<path d="m6 10 6 6 6-6"/>',
+  camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.500"/>', parent:'<path d="M7 17 17 7M9 7h8v8"/>',
+  sliders:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>', reset:'<path d="M4 4v6h6"/><path d="M5 14a8 8 0 1 0 2-7"/>',
+  shapes:'<rect x="3" y="12" width="9" height="9" rx="1"/><circle cx="16.5" cy="7.5" r="4.5"/><path d="m8 3 4 7H4z"/>',
+  copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  save:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>', open:'<path d="M12 16V5M7 9l5-5 5 5M5 20h14"/>'
+};
+function icon(name, size) {
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("width", size || 20); s.setAttribute("height", size || 20);
+  s.setAttribute("fill", "none"); s.setAttribute("stroke", "currentColor"); s.setAttribute("stroke-width", "1.8");
+  s.setAttribute("stroke-linecap", "round"); s.setAttribute("stroke-linejoin", "round"); s.setAttribute("aria-hidden", "true");
+  s.innerHTML = ICONS[name] || ""; return s;
+}
+document.querySelectorAll("[data-icon]").forEach(e => e.prepend(icon(e.dataset.icon)));
+
+/* ---------- Barra de herramientas ---------- */
+const inr = (v, a, b) => typeof v === "number" && v >= a && v <= b;
+function toHex(c, fb) {
+  const m = String(c).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+  if (!m || (m[4] !== undefined && +m[4] === 0)) return fb;
+  return "#" + [m[1], m[2], m[3]].map(n => (+n).toString(16).padStart(2, "0")).join("");
+}
+function cb(label, fn, pressed, ic) {
+  const b = document.createElement("button"); b.type = "button"; b.className = "cbtn";
+  if (ic) b.append(icon(ic, 18)); b.append(document.createTextNode(label));
+  if (pressed !== undefined) b.setAttribute("aria-pressed", String(pressed));
+  b.addEventListener("click", fn); return b;
+}
+function colorBtn(label, value, onInput, ic) {
+  const l = document.createElement("label"); l.className = "cbtn"; if (ic) l.append(icon(ic, 18)); l.append(document.createTextNode(label + " "));
+  const i = document.createElement("input"); i.type = "color"; i.value = value; i.addEventListener("input", () => onInput(i.value)); l.append(i); return l;
+}
+function slider(label, min, max, step, val, fn) {
+  const d = document.createElement("div"), l = document.createElement("label"), sp = document.createElement("span"); d.className = "field";
+  sp.textContent = val; l.append(document.createTextNode(label + ": "), sp);
+  const i = document.createElement("input"); i.type = "range"; i.min = min; i.max = max; i.step = step; i.value = val;
+  i.addEventListener("input", () => { sp.textContent = i.value; fn(+i.value); }); d.append(l, i); return d;
+}
+function colorField(label, val, fn) {
+  const d = document.createElement("div"); d.className = "field row"; const l = document.createElement("label"); l.textContent = label;
+  const i = document.createElement("input"); i.type = "color"; i.value = val; i.addEventListener("input", () => fn(i.value)); d.append(l, i); return d;
+}
+function chipRow(items, current, fn) {
+  const d = document.createElement("div"); d.className = "chips";
+  items.forEach(([v, t]) => { const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = t; b.setAttribute("aria-pressed", String(v === current)); b.addEventListener("click", () => { fn(v); d.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c === b))); }); d.append(b); });
+  return d;
+}
+function showPanel(node) {
+  $("sheet").hidden = false; document.querySelectorAll(".sg").forEach(g => { g.hidden = true; });
+  const p = $("ctxPanel"); p.hidden = false; p.replaceChildren(node);
+}
+function setSt(p) {
+  const k = styleKey(sel.key), n = { ...(state.styles[k] || {}), ...p };
+  Object.keys(n).forEach(x => { if (n[x] === undefined) delete n[x]; });
+  state.styles[k] = n; changed();
+}
+function bump(delta) {
+  const m = parseFloat(getComputedStyle(sel.el).fontSize) + delta, W = $("site").clientWidth || 1000;
+  setSt({ size: Math.max(8, Math.min(120, Math.round(W < 1000 ? m * 1000 / W : m))) });
+}
+function rowOp(op) {
+  const [k, i] = sel.key.split(":"), idx = +i, field = k === "s" ? "servicesText" : "hoursText", n = k === "s" ? 3 : 2;
+  const rows = parseLines(state[field], n), max = k === "s" ? 12 : 14;
+  if (op === "add") { if (rows.length >= max) { showToast("Máximo " + max + " filas."); return; } rows.splice(idx + 1, 0, [...rows[idx]]); }
+  else { rows.splice(idx, 1); if (sel.el) sel.el.classList.remove("mw-sel"); sel = null; }
+  state[field] = joinRows(rows); setInputValues(); changed(); buildCtx();
+}
+function hideSection() {
+  const id = sel.key, i = state.sections.findIndex(s => s.id === id);
+  if (i >= 0) state.sections[i].visible = false; else if (id === "nav") state.showNav = false; else if (id === "footer") state.showFooter = false;
+  setInputValues(); deselect(); changed();
+}
+
+/* Efectos de cualquier elemento: fondo, borde, redondeo, sombra, resplandor, opacidad (y neón/contorno en textos) */
+function fxKey() { return sel.kind === "box" ? sel.key : boxKey(sel.el); }
+function setBox(p) {
+  const k = fxKey(); if (!k) return; const n = { ...(state.boxes[k] || {}), ...p };
+  Object.keys(n).forEach(x => { if (n[x] === undefined || n[x] === false || n[x] === 0 || n[x] === "") delete n[x]; });
+  if (n.op === 100) delete n.op;
+  if (Object.keys(n).length) state.boxes[k] = n; else delete state.boxes[k];
+  changed();
+}
+function fxPanel() {
+  const k = fxKey(), b = state.boxes[k] || {}, sk = styleKey(sel.key), st = state.styles[sk] || {}, isText = sel.kind === "text", w = document.createElement("div");
+  if (sel.kind !== "sec") w.append(colorField("Fondo", b.bg || "#ffffff", v => setBox({ bg: v })));
+  w.append(slider("Redondeo (px)", 0, 80, 1, b.radius || 0, v => setBox({ radius: v })));
+  w.append(slider("Grosor del borde", 0, 12, 1, b.bw || 0, v => setBox({ bw: v })), colorField("Color del borde", b.bc || "#000000", v => setBox({ bc: v })));
+  w.append(slider("Sombra paralela", 0, 3, 1, b.shadow || 0, v => setBox({ shadow: v })));
+  w.append(slider("Resplandor", 0, 3, 1, b.glow || 0, v => setBox({ glow: v })), colorField("Color del resplandor", b.gc || "#3867FF", v => setBox({ gc: v })));
+  w.append(slider("Opacidad (%)", 20, 100, 5, b.op || 100, v => setBox({ op: v })));
+  if (isText) {
+    w.append(slider("Sombra del texto", 0, 3, 1, st.tshadow || 0, v => setSt({ tshadow: v || undefined })));
+    w.append(colorField("Neón (color)", st.neon || "#00e5ff", v => setSt({ neon: v })));
+    const off = document.createElement("button"); off.type = "button"; off.className = "btn"; off.textContent = "Quitar neón"; off.addEventListener("click", () => { setSt({ neon: undefined }); fxPanel(); }); w.append(off);
+    w.append(slider("Contorno del texto", 0, 6, 1, st.ow || 0, v => setSt({ ow: v || undefined })), colorField("Color del contorno", st.oc || "#000000", v => setSt({ oc: v })));
+  }
+  const rs = document.createElement("button"); rs.type = "button"; rs.className = "btn danger"; rs.textContent = "Quitar todos los efectos";
+  rs.addEventListener("click", () => { delete state.boxes[k]; if (state.styles[sk]) ["tshadow","neon","ow","oc"].forEach(x => delete state.styles[sk][x]); changed(); fxPanel(); });
+  w.append(rs); showPanel(w);
+}
+function toggleFx() { if (!$("sheet").hidden && !$("ctxPanel").hidden) openTab(null); else fxPanel(); }
+
+function buildCtx() {
+  const box = $("ctx"); box.replaceChildren(); box.hidden = !sel; $("tabs").hidden = Boolean(sel);
+  if (!sel) return;
+  const parent = parentTarget(), up = () => cb("Contenedor", () => { if (parent) select(parent); }, undefined, "parent");
+  if (sel.kind === "text" && ctxSub === "font") {
+    box.append(cb("Volver", () => { ctxSub = null; buildCtx(); }, undefined, "back"), cb("Normal", () => setSt({ font: undefined })));
+    Object.keys(FONTS).forEach(f => { const b = cb(FONT_NAMES[f], () => setSt({ font: f }), (state.styles[styleKey(sel.key)] || {}).font === f); b.style.fontFamily = FONTS[f].head; box.append(b); });
+    return;
+  }
+  if (sel.kind === "text") {
+    const st = state.styles[styleKey(sel.key)] || {}, cs = getComputedStyle(sel.el), bold = parseInt(cs.fontWeight, 10) >= 600;
+    const al = st.align || (["center","right"].includes(cs.textAlign) ? cs.textAlign : "left");
+    box.append(cb("Editar", startEdit, undefined, "edit"), cb("Fuente", () => { ctxSub = "font"; buildCtx(); }, undefined, "type"), cb("A−", () => bump(-2)), cb("A+", () => bump(2)));
+    box.append(colorBtn("Color", toHex(cs.color, "#000000"), v => setSt({ color: v }), "palette"), cb("Negrita", () => setSt({ weight: bold ? "400" : "800" }), bold, "bold"));
+    box.append(cb({ left:"Izquierda", center:"Centro", right:"Derecha" }[al], () => setSt({ align: { left:"center", center:"right", right:"left" }[al] }), undefined, { left:"alignL", center:"alignC", right:"alignR" }[al]));
+    box.append(cb("Efectos", toggleFx, undefined, "sparkle"));
+    if (Object.keys(st).length) box.append(cb("Normal", () => { delete state.styles[styleKey(sel.key)]; changed(); }, undefined, "reset"));
+    if (sel.key === "b:businessName") box.append(cb("Logo", () => $("file-logo").click(), undefined, "image"));
+    if (sel.el.closest("[data-row]")) box.append(cb("Fila", () => rowOp("add"), undefined, "plus"), cb("Borrar fila", () => rowOp("del"), undefined, "trash"));
+    box.append(cb("Eliminar", delSel, undefined, "trash"));
+    if (parent) box.append(up());
+  } else if (sel.kind === "img") {
+    box.append(cb(images[sel.key] ? "Cambiar" : "Subir", () => $("file-" + sel.key).click(), undefined, "camera"));
+    if (images[sel.key]) box.append(cb("Editar imagen", () => openImgEditor(sel.key), undefined, "sliders"));
+    box.append(cb("Efectos", toggleFx, undefined, "sparkle"));
+    if (images[sel.key]) box.append(cb("Quitar foto", () => removeImage(sel.key), undefined, "image"));
+    box.append(cb("Eliminar", delSel, undefined, "trash"));
+    if (parent) box.append(up());
+  } else if (sel.kind === "el") {
+    const e = state.els.find(x => x.id === sel.key); if (!e) { deselect(); return; }
+    const L = { left:"Izquierda", center:"Centro", right:"Derecha" }, I = { left:"alignL", center:"alignC", right:"alignR" }, N = { left:"center", center:"right", right:"left" };
+    if (e.t !== "img") box.append(colorBtn("Color", e.c, v => setEl({ c: v }), "palette"));
+    box.append(cb("Menos", () => setEl({ w: Math.max(16, e.w - 16) }), undefined, "minus"), cb("Más", () => setEl({ w: Math.min(600, e.w + 16) }), undefined, "plus"));
+    box.append(cb(L[e.a], () => { setEl({ a: N[e.a] }); buildCtx(); }, undefined, I[e.a]));
+    box.append(cb("Subir", () => moveEl(-1), undefined, "up"), cb("Bajar", () => moveEl(1), undefined, "down"), cb("Duplicar", dupEl, undefined, "copy"));
+    box.append(cb("Efectos", toggleFx, undefined, "sparkle"), cb("Eliminar", delSel, undefined, "trash"));
+  } else if (sel.kind === "sec") {
+    const id = sel.key, i = state.sections.findIndex(s => s.id === id);
+    box.append(colorBtn("Fondo", toHex(getComputedStyle(sel.el).backgroundColor, "#ffffff"), v => { state.secBg[id] = v; changed(); }, "palette"));
+    if (state.secBg[id]) box.append(cb("Sin fondo", () => { delete state.secBg[id]; changed(); buildCtx(); }, undefined, "reset"));
+    if (i >= 0) { const u = cb("Subir", () => moveSection(i, -1), undefined, "up"), d = cb("Bajar", () => moveSection(i, 1), undefined, "down"); u.disabled = i === 0; d.disabled = i === state.sections.length - 1; box.append(u, d); }
+    box.append(cb("Efectos", toggleFx, undefined, "sparkle"), cb("Eliminar", delSel, undefined, "trash"));
+  } else {
+    const k = sel.key, b = state.boxes[k] || {};
+    box.append(colorBtn("Fondo", b.bg || toHex(getComputedStyle(sel.el).backgroundColor, "#ffffff"), v => setBox({ bg: v }), "palette"), cb("Efectos", toggleFx, undefined, "sparkle"));
+    if (parent) box.append(up());
+    box.append(cb("Eliminar", delSel, undefined, "trash"));
+  }
+  box.append(cb("Listo", deselect, undefined, "check"));
+}
+function openTab(name) {
+  activeTab = name === activeTab ? null : name;
+  $("sheet").hidden = !activeTab; $("ctxPanel").hidden = true;
+  document.querySelectorAll(".sg").forEach(g => { g.hidden = g.dataset.tab !== activeTab; });
+  $("tabs").querySelectorAll(".tab").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tab === activeTab)));
+}
+TABS.forEach(([id, ic, label]) => {
+  const b = document.createElement("button"); b.type = "button"; b.className = "tab"; b.dataset.tab = id; b.setAttribute("aria-pressed", "false");
+  b.append(icon(ic, 22), document.createTextNode(label));
+  b.addEventListener("click", () => { if (sel) deselect(); openTab(id); }); $("tabs").append(b);
+});
+function removeImage(k) { images[k] = ""; origs[k] = ""; delete state.imgEdits[k]; saveImages(); saveOrigs(); changed(); buildCtx(); }
+
+/* ---------- Efectos guardados (cajas) ---------- */
+let boxed = [];
+function applyBoxes() {
+  boxed.forEach(e => { ["background","borderRadius","border","boxShadow","opacity","display"].forEach(p => { e.style[p] = ""; }); }); boxed = [];
+  Object.entries(state.boxes).forEach(([k, b]) => {
+    const e = elByBoxKey(k); if (!e || !isObj(b)) return; boxed.push(e);
+    if (HEX.test(b.bg || "")) e.style.background = b.bg;
+    if (inr(b.radius, 1, 200)) e.style.borderRadius = b.radius + "px";
+    if (inr(b.bw, 1, 12)) e.style.border = b.bw + "px solid " + (HEX.test(b.bc || "") ? b.bc : "#000000");
+    const sh = [];
+    if (inr(b.shadow, 1, 3)) sh.push("0 " + b.shadow * 4 + "px " + b.shadow * 12 + "px rgba(0,0,0,.3)");
+    if (inr(b.glow, 1, 3)) sh.push("0 0 " + b.glow * 10 + "px " + b.glow * 2 + "px " + (HEX.test(b.gc || "") ? b.gc : "#3867FF"));
+    if (sh.length) e.style.boxShadow = sh.join(",");
+    if (inr(b.op, 20, 99)) e.style.opacity = b.op / 100;
+    if (b.hide === true) e.style.display = "none";
+  });
+}
+
+/* ---------- Editor de fotos ---------- */
+const DEF_ADJ = { brightness:0, contrast:0, shadows:0, highlights:0, saturation:0, warmth:0, hue:0, sharpness:0, blur:0, depth:0, vignette:0 };
+const ADJ_RANGE = { brightness:[-100,100], contrast:[-100,100], shadows:[-100,100], highlights:[-100,100], saturation:[-100,100], warmth:[-100,100], hue:[-180,180], sharpness:[0,100], blur:[0,10], depth:[0,100], vignette:[0,100] };
+const defP = () => ({ crop:{ x:0, y:0, w:1, h:1 }, ratio:"free", shape:"none", rot90:0, angle:0, flipH:false, flipV:false, adj:{ ...DEF_ADJ }, filter:"none", duo:{ on:false, a:"#1e1b4b", b:"#f59e0b" } });
+const num = (v, a, b, d) => typeof v === "number" && isFinite(v) ? Math.max(a, Math.min(b, v)) : d;
+function cleanP(p) {
+  const d = defP(); if (!isObj(p)) return d;
+  const c = isObj(p.crop) ? p.crop : {}, w = num(c.w, .05, 1, 1), h = num(c.h, .05, 1, 1);
+  d.crop = { x: num(c.x, 0, 1 - w, 0), y: num(c.y, 0, 1 - h, 0), w, h };
+  d.ratio = ["free","1:1","4:3","3:4","16:9","9:16"].includes(p.ratio) ? p.ratio : "free";
+  d.shape = ["none","circle","rounded"].includes(p.shape) ? p.shape : "none";
+  d.rot90 = [0,1,2,3].includes(p.rot90) ? p.rot90 : 0; d.angle = num(p.angle, -45, 45, 0);
+  d.flipH = p.flipH === true; d.flipV = p.flipV === true;
+  const a = isObj(p.adj) ? p.adj : {}; Object.keys(DEF_ADJ).forEach(k => { d.adj[k] = num(a[k], ADJ_RANGE[k][0], ADJ_RANGE[k][1], 0); });
+  d.filter = ["none","warm","cool","vintage","bw"].includes(p.filter) ? p.filter : "none";
+  if (isObj(p.duo)) d.duo = { on: p.duo.on === true, a: safeColor(p.duo.a, "#1e1b4b"), b: safeColor(p.duo.b, "#f59e0b") };
+  return d;
+}
+const hex2 = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+function boxBlur(src, w, h, r) {
+  const tmp = new Float32Array(src.length), out = new Uint8ClampedArray(src.length), win = 2 * r + 1;
+  for (let y = 0; y < h; y++) for (let c = 0; c < 3; c++) {
+    const row = y * w * 4 + c; let sum = 0;
+    for (let x = -r; x <= r; x++) sum += src[row + Math.min(w - 1, Math.max(0, x)) * 4];
+    for (let x = 0; x < w; x++) { tmp[row + x * 4] = sum / win; sum += src[row + Math.min(w - 1, x + r + 1) * 4] - src[row + Math.max(0, x - r) * 4]; }
+  }
+  for (let x = 0; x < w; x++) for (let c = 0; c < 3; c++) {
+    const col = x * 4 + c; let sum = 0;
+    for (let y = -r; y <= r; y++) sum += tmp[col + Math.min(h - 1, Math.max(0, y)) * w * 4];
+    for (let y = 0; y < h; y++) { out[col + y * w * 4] = sum / win; sum += tmp[col + Math.min(h - 1, y + r + 1) * w * 4] - tmp[col + Math.max(0, y - r) * w * 4]; }
+  }
+  for (let i = 3; i < src.length; i += 4) out[i] = src[i];
+  return out;
+}
+function processPixels(d, w, h, P) {
+  const a = P.adj, f = P.filter, duo = P.duo;
+  if (a.brightness || a.contrast || a.saturation || a.hue || a.warmth || a.shadows || a.highlights || f !== "none" || duo.on) {
+    const br = a.brightness * 1.28, ct = Math.max(-.95, Math.min(.95, a.contrast / 100)), cf = Math.tan((ct + 1) * Math.PI / 4);
+    const sat = 1 + a.saturation / 100, wm = a.warmth * .4, sh = a.shadows / 100, hi = a.highlights / 100;
+    const hr = a.hue * Math.PI / 180, co = Math.cos(hr), si = Math.sin(hr);
+    const m0 = .213 + co * .787 - si * .213, m1 = .715 - co * .715 - si * .715, m2 = .072 - co * .072 + si * .928;
+    const m3 = .213 - co * .213 + si * .143, m4 = .715 + co * .285 + si * .14, m5 = .072 - co * .072 - si * .283;
+    const m6 = .213 - co * .213 - si * .787, m7 = .715 - co * .715 + si * .715, m8 = .072 + co * .928 + si * .072;
+    const dA = hex2(duo.a), dB = hex2(duo.b);
+    for (let i = 0; i < d.length; i += 4) {
+      let r = d[i], g = d[i + 1], b = d[i + 2];
+      if (a.hue) { const nr = m0 * r + m1 * g + m2 * b, ng = m3 * r + m4 * g + m5 * b, nb = m6 * r + m7 * g + m8 * b; r = nr; g = ng; b = nb; }
+      if (sat !== 1) { const l = .299 * r + .587 * g + .114 * b; r = l + (r - l) * sat; g = l + (g - l) * sat; b = l + (b - l) * sat; }
+      if (wm) { r += wm; b -= wm; g += wm * .15; }
+      if (br) { r += br; g += br; b += br; }
+      if (ct) { r = (r - 128) * cf + 128; g = (g - 128) * cf + 128; b = (b - 128) * cf + 128; }
+      if (sh || hi) { const l = Math.max(0, Math.min(1, (.299 * r + .587 * g + .114 * b) / 255)), k = (1 - l) * (1 - l) * sh * 70 + l * l * hi * 70; r += k; g += k; b += k; }
+      if (f === "warm") { r = r * 1.08 + 6; b *= .92; }
+      else if (f === "cool") { r *= .92; b = b * 1.08 + 6; }
+      else if (f === "vintage") {
+        const nr = r * .393 + g * .769 + b * .189, ng = r * .349 + g * .686 + b * .168, nb = r * .272 + g * .534 + b * .131;
+        r = r * .4 + nr * .6 + 14; g = g * .4 + ng * .6 + 10; b = b * .4 + nb * .6 + 6;
+      } else if (f === "bw") { const l = .299 * r + .587 * g + .114 * b; r = g = b = (l - 128) * 1.1 + 128; }
+      if (duo.on) { const l = Math.max(0, Math.min(1, (.299 * r + .587 * g + .114 * b) / 255)); r = dA[0] + (dB[0] - dA[0]) * l; g = dA[1] + (dB[1] - dA[1]) * l; b = dA[2] + (dB[2] - dA[2]) * l; }
+      d[i] = r; d[i + 1] = g; d[i + 2] = b;
+    }
+  }
+  const rad = Math.round(a.blur);
+  if (rad > 0 || a.depth > 0 || a.sharpness > 0) {
+    let cur = new Uint8ClampedArray(d);
+    if (rad > 0) cur = boxBlur(cur, w, h, rad);
+    if (a.depth > 0) {
+      const bb = boxBlur(cur, w, h, Math.max(2, Math.round(Math.min(w, h) / 50))), cx = w / 2, cy = h / 2, md = Math.hypot(cx, cy), k = a.depth / 100;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const t = Math.max(0, (Math.hypot(x - cx, y - cy) / md - .3) / .7), s = Math.min(1, t * t * 3) * k, i = (y * w + x) * 4;
+        cur[i] += (bb[i] - cur[i]) * s; cur[i + 1] += (bb[i + 1] - cur[i + 1]) * s; cur[i + 2] += (bb[i + 2] - cur[i + 2]) * s;
+      }
+    }
+    if (a.sharpness > 0) { const bl = boxBlur(cur, w, h, 1), k = a.sharpness / 100 * 1.6; for (let i = 0; i < cur.length; i++) if ((i & 3) !== 3) cur[i] = cur[i] + (cur[i] - bl[i]) * k; }
+    d.set(cur);
+  }
+  if (a.vignette > 0) {
+    const v = a.vignette / 100, cx = w / 2, cy = h / 2, md = Math.hypot(cx, cy);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const t = Math.max(0, (Math.hypot(x - cx, y - cy) / md - .35) / .65), k = 1 - v * t * t, i = (y * w + x) * 4;
+      d[i] *= k; d[i + 1] *= k; d[i + 2] *= k;
+    }
+  }
+}
+function transformed(src, P, maxSide) {
+  const sw = src.naturalWidth || src.width, sh = src.naturalHeight || src.height, a = (P.rot90 * 90 + P.angle) * Math.PI / 180;
+  const cs = Math.abs(Math.cos(a)), sn = Math.abs(Math.sin(a)); let W = sw * cs + sh * sn, H = sw * sn + sh * cs;
+  const k = Math.min(1, maxSide / Math.max(W, H)); W = Math.max(1, Math.round(W * k)); H = Math.max(1, Math.round(H * k));
+  const c = document.createElement("canvas"); c.width = W; c.height = H; const g = c.getContext("2d");
+  g.translate(W / 2, H / 2); g.rotate(a); g.scale(P.flipH ? -1 : 1, P.flipV ? -1 : 1); g.drawImage(src, -sw * k / 2, -sh * k / 2, sw * k, sh * k);
+  return c;
+}
+function applyShape(c, shape) {
+  if (shape === "none") return; const g = c.getContext("2d"), w = c.width, h = c.height;
+  g.globalCompositeOperation = "destination-in"; g.beginPath();
+  if (shape === "circle") g.ellipse(w / 2, h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+  else { const r = Math.min(w, h) * .18; g.moveTo(r, 0); g.arcTo(w, 0, w, h, r); g.arcTo(w, h, 0, h, r); g.arcTo(0, h, 0, 0, r); g.arcTo(0, 0, w, 0, r); g.closePath(); }
+  g.fill(); g.globalCompositeOperation = "source-over";
+}
+function renderEdit(src, P, maxSide, noCrop) {
+  const T = transformed(src, P, maxSide); let c = T;
+  if (!noCrop) {
+    const cr = P.crop, w = Math.max(1, Math.round(cr.w * T.width)), h = Math.max(1, Math.round(cr.h * T.height));
+    c = document.createElement("canvas"); c.width = w; c.height = h;
+    c.getContext("2d").drawImage(T, Math.round(cr.x * T.width), Math.round(cr.y * T.height), w, h, 0, 0, w, h);
+  }
+  const g = c.getContext("2d"), id = g.getImageData(0, 0, c.width, c.height);
+  processPixels(id.data, c.width, c.height, P); g.putImageData(id, 0, 0);
+  if (!noCrop) applyShape(c, P.shape);
+  return c;
+}
+
+const IED = { key:null, P:null, full:null, small:null, tab:"crop", raf:0 }, iedEl = $("ied"), cropBox = $("cropBox");
+const IED_TABS = [["crop","crop","Recortar"],["rotate","rotate","Girar"],["adjust","sun","Ajustes"],["sharp","blur","Nitidez"],["filters","filter","Filtros"]];
+function tdims() {
+  const s = IED.small, a = (IED.P.rot90 * 90 + IED.P.angle) * Math.PI / 180, c = Math.abs(Math.cos(a)), n = Math.abs(Math.sin(a));
+  return [s.width * c + s.height * n, s.width * n + s.height * c];
+}
+const ratioVal = () => ({ "1:1":1, "4:3":4 / 3, "3:4":3 / 4, "16:9":16 / 9, "9:16":9 / 16 })[IED.P.ratio] || 0;
+function fitCrop() {
+  const c = IED.P.crop, r = ratioVal(); c.x = 0; c.y = 0; c.w = 1; c.h = 1; if (!r) return;
+  const [TW, TH] = tdims(), ta = TW / TH; let w, h;
+  if (ta > r) { h = 1; w = r / ta; } else { w = 1; h = ta / r; }
+  c.w = w; c.h = h; c.x = (1 - w) / 2; c.y = (1 - h) / 2;
+}
+function positionCrop() { const c = IED.P.crop, s = cropBox.style; s.left = c.x * 100 + "%"; s.top = c.y * 100 + "%"; s.width = c.w * 100 + "%"; s.height = c.h * 100 + "%"; }
+function drawPreview() {
+  if (!IED.small || iedEl.hidden) return;
+  const nc = IED.tab === "crop" || IED.tab === "rotate", c = renderEdit(IED.small, IED.P, 640, nc), cv = $("iedCanvas");
+  cv.width = c.width; cv.height = c.height; cv.getContext("2d").drawImage(c, 0, 0);
+  const st = $("iedStage"), s = Math.min((st.clientWidth - 24) / c.width, (st.clientHeight - 24) / c.height, 1.5);
+  cv.style.width = Math.max(40, Math.round(c.width * s)) + "px"; cv.style.height = Math.max(40, Math.round(c.height * s)) + "px";
+  cropBox.hidden = IED.tab !== "crop"; positionCrop();
+}
+const sched = () => { cancelAnimationFrame(IED.raf); IED.raf = requestAnimationFrame(drawPreview); };
+function iedPanel() {
+  const P = IED.P, w = document.createElement("div"), adj = (k, label) => slider(label, ADJ_RANGE[k][0], ADJ_RANGE[k][1], 1, P.adj[k], v => { P.adj[k] = v; sched(); });
+  const btn = (label, ic, fn) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.append(icon(ic, 18), document.createTextNode(label)); b.addEventListener("click", fn); return b; };
+  const geo = fn => { fn(); fitCrop(); drawPreview(); };
+  if (IED.tab === "crop") {
+    const n = document.createElement("p"); n.className = "intro"; n.textContent = "Arrastrá el recuadro o sus esquinas. La forma se ve al pasar a otra pestaña.";
+    w.append(n, chipRow([["free","Libre"],["1:1","1:1"],["4:3","4:3"],["3:4","3:4"],["16:9","16:9"],["9:16","9:16"]], P.ratio, v => { P.ratio = v; fitCrop(); positionCrop(); }));
+    w.append(chipRow([["none","Sin forma"],["circle","Círculo"],["rounded","Redondeado"]], P.shape, v => { P.shape = v; if (v === "circle") { P.ratio = "1:1"; fitCrop(); positionCrop(); iedPanel(); } }));
+  } else if (IED.tab === "rotate") {
+    const row = document.createElement("div"); row.className = "chips";
+    row.append(btn("Izquierda", "rotate", () => geo(() => { P.rot90 = (P.rot90 + 3) % 4; })), btn("Derecha", "rotate", () => geo(() => { P.rot90 = (P.rot90 + 1) % 4; })),
+      btn("Espejar horizontal", "flip", () => geo(() => { P.flipH = !P.flipH; })), btn("Espejar vertical", "flip", () => geo(() => { P.flipV = !P.flipV; })));
+    w.append(row, slider("Ángulo preciso (°)", -45, 45, .5, P.angle, v => { P.angle = v; fitCrop(); sched(); }));
+  } else if (IED.tab === "adjust") {
+    [["brightness","Brillo"],["contrast","Contraste"],["shadows","Sombras"],["highlights","Luces"],["saturation","Saturación"],["warmth","Calidez / temperatura"],["hue","Matiz"]].forEach(([k, l]) => w.append(adj(k, l)));
+  } else if (IED.tab === "sharp") {
+    w.append(adj("sharpness", "Nitidez"), adj("blur", "Desenfoque"), adj("depth", "Profundidad (desenfoca los bordes)"));
+  } else {
+    w.append(chipRow([["none","Original"],["warm","Cálido"],["cool","Frío"],["vintage","Vintage"],["bw","Blanco y negro"]], P.filter, v => { P.filter = v; sched(); }));
+    w.append(chipRow([[false,"Sin duotono"],[true,"Duotono"]], P.duo.on, v => { P.duo.on = v; sched(); }),
+      colorField("Duotono: sombras", P.duo.a, v => { P.duo.a = v; P.duo.on = true; sched(); }), colorField("Duotono: luces", P.duo.b, v => { P.duo.b = v; P.duo.on = true; sched(); }), adj("vignette", "Viñeta"));
+  }
+  w.append(btn("Restablecer imagen", "reset", () => { IED.P = defP(); iedPanel(); drawPreview(); }));
+  $("iedPanel").replaceChildren(w);
+}
+function iedTabs() {
+  const box = $("iedTabs"); box.replaceChildren();
+  IED_TABS.forEach(([id, ic, label]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "tab"; b.setAttribute("aria-pressed", String(id === IED.tab)); b.append(icon(ic, 22), document.createTextNode(label));
+    b.addEventListener("click", () => { IED.tab = id; if (id === "crop") fitIfFree(); iedTabs(); iedPanel(); drawPreview(); }); box.append(b);
+  });
+}
+const fitIfFree = () => { if (ratioVal()) { const c = IED.P.crop; if (c.w === 1 && c.h === 1) fitCrop(); } };
+function openImgEditor(key) {
+  const url = origs[key] || images[key]; if (!url) return;
+  const img = new Image();
+  img.onload = () => {
+    const k = Math.min(1, 900 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(img.naturalWidth * k)); c.height = Math.max(1, Math.round(img.naturalHeight * k));
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    Object.assign(IED, { key, P: cleanP(state.imgEdits[key]), full: img, small: c, tab: "crop" });
+    iedEl.hidden = false; document.documentElement.style.overflow = "hidden"; iedTabs(); iedPanel(); drawPreview();
+  };
+  img.onerror = () => showToast("No se pudo abrir la imagen.");
+  img.src = url;
+}
+function closeIed() { iedEl.hidden = true; document.documentElement.style.overflow = ""; IED.full = IED.small = null; }
+function iedApply() {
+  const key = IED.key, s = SLOTS.find(x => x.key === key), P = IED.P;
+  const c = renderEdit(IED.full, P, Math.min(3000, s.max / Math.max(P.crop.w, P.crop.h)), false);
+  if (!origs[key]) origs[key] = images[key];
+  images[key] = (s.alpha || P.shape !== "none" || P.angle !== 0) ? c.toDataURL("image/png") : c.toDataURL("image/jpeg", .88);
+  state.imgEdits[key] = cleanP(P); saveImages(); saveOrigs(); closeIed(); changed(); buildCtx();
+}
+let drag = null;
+cropBox.addEventListener("pointerdown", ev => {
+  ev.preventDefault(); cropBox.setPointerCapture(ev.pointerId);
+  drag = { h: ev.target.dataset.h || "", rect: $("iedCanvas").getBoundingClientRect(), s: { ...IED.P.crop }, x: ev.clientX, y: ev.clientY };
+});
+cropBox.addEventListener("pointermove", ev => {
+  if (!drag) return; const { h, rect, s } = drag, c = IED.P.crop, cl = (v, a, b) => Math.max(a, Math.min(b, v));
+  if (!h) { c.x = cl(s.x + (ev.clientX - drag.x) / rect.width, 0, 1 - s.w); c.y = cl(s.y + (ev.clientY - drag.y) / rect.height, 0, 1 - s.h); }
+  else {
+    const ax = h.includes("w") ? s.x + s.w : s.x, ay = h.includes("n") ? s.y + s.h : s.y;
+    const px = cl((ev.clientX - rect.left) / rect.width, 0, 1), py = cl((ev.clientY - rect.top) / rect.height, 0, 1);
+    let w = Math.max(.05, Math.abs(px - ax)), hh = Math.max(.05, Math.abs(py - ay)); const r = ratioVal();
+    if (r) { const [TW, TH] = tdims(); hh = w * TW / (TH * r); const mh = py < ay ? ay : 1 - ay; if (hh > mh) { hh = mh; w = hh * TH * r / TW; } }
+    c.x = px < ax ? ax - w : ax; c.y = py < ay ? ay - hh : ay; c.w = w; c.h = hh;
+  }
+  positionCrop();
+});
+const endDrag = () => { drag = null; };
+cropBox.addEventListener("pointerup", endDrag); cropBox.addEventListener("pointercancel", endDrag);
+$("iedCancel").addEventListener("click", closeIed); $("iedApply").addEventListener("click", iedApply);
+document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !iedEl.hidden) closeIed(); });
+window.addEventListener("resize", () => { if (!iedEl.hidden) sched(); });
+$("showHidden").addEventListener("click", () => { Object.keys(state.boxes).forEach(k => { delete state.boxes[k].hide; if (!Object.keys(state.boxes[k]).length) delete state.boxes[k]; }); changed(); showToast("Elementos ocultos restaurados."); });
+
+/* ---------- Elementos, eliminar y proyecto ---------- */
+function elSvg(L) {
+  const sv = document.createElementNS("http://www.w3.org/2000/svg", "svg"); sv.setAttribute("viewBox", "0 0 24 24"); sv.setAttribute("aria-hidden", "true");
+  if (L[2] === "f") sv.setAttribute("fill", "currentColor");
+  else { sv.setAttribute("fill", "none"); sv.setAttribute("stroke", "currentColor"); sv.setAttribute("stroke-width", "1.6"); sv.setAttribute("stroke-linecap", "round"); sv.setAttribute("stroke-linejoin", "round"); }
+  sv.innerHTML = L[3]; return sv;
+}
+function renderEls() {
+  $("site").querySelectorAll(".el").forEach(e => e.remove());
+  state.els.forEach(e => {
+    const sec = $("site").querySelector('[data-section="' + e.s + '"]'); if (!sec) return;
+    const w = document.createElement("div"); w.className = "el"; w.dataset.el = e.id; w.style.justifyContent = { left:"flex-start", center:"center", right:"flex-end" }[e.a];
+    if (e.t === "img") { const i = document.createElement("img"); i.src = e.src; i.alt = ""; i.style.width = e.w + "px"; w.append(i); }
+    else { const sv = elSvg(ELIB.find(x => x[0] === e.t)); sv.style.width = e.w + "px"; w.style.color = e.c; w.append(sv); }
+    sec.append(w);
+  });
+}
+function setEl(p) { const e = state.els.find(x => x.id === sel.key); if (e) { Object.assign(e, p); changed(); } }
+function moveEl(d) {
+  const L = state.els, i = L.findIndex(x => x.id === sel.key); if (i < 0) return;
+  let j = i + d; while (j >= 0 && j < L.length && L[j].s !== L[i].s) j += d;
+  if (j < 0 || j >= L.length) return; [L[i], L[j]] = [L[j], L[i]]; changed();
+}
+function addEl(t, src) {
+  if (state.els.length >= 30) { showToast("Máximo 30 elementos."); return; }
+  const n = Math.max(0, ...state.els.map(x => +x.id.slice(1))) + 1;
+  const e = { id: "e" + n, t, c: safeColor($("elColor").value, "#b88a55"), w: t === "img" ? 200 : 80, a: "center", s: EL_SECS.includes($("elSec").value) ? $("elSec").value : "hero", src: src || "" };
+  state.els.push(e); changed(); select({ kind: "el", key: e.id, el: null });
+  const x = $("site").querySelector('[data-el="' + e.id + '"]'); if (x) x.scrollIntoView({ block: "center", behavior: "smooth" });
+}
+function dupEl() {
+  const i = state.els.findIndex(x => x.id === sel.key); if (i < 0) return;
+  if (state.els.length >= 30) { showToast("Máximo 30 elementos."); return; }
+  const n = Math.max(0, ...state.els.map(x => +x.id.slice(1))) + 1, c = { ...state.els[i], id: "e" + n };
+  state.els.splice(i + 1, 0, c); changed(); select({ kind: "el", key: c.id, el: null });
+}
+function delSel() {
+  if (!sel) return;
+  if (sel.kind === "sec") { hideSection(); showToast("Sección eliminada. Podés recuperarla en Secciones o con Deshacer."); return; }
+  if (sel.kind === "el") { state.els = state.els.filter(x => x.id !== sel.key); deselect(); changed(); }
+  else { setBox({ hide: true }); deselect(); }
+  showToast("Eliminado. Podés recuperarlo con Deshacer.");
+}
+ELIB.forEach(L => {
+  const b = document.createElement("button"); b.type = "button"; b.title = L[1]; b.setAttribute("aria-label", L[1]);
+  b.append(elSvg(L)); b.addEventListener("click", () => addEl(L[0])); $("elGrid").append(b);
+});
+$("elUpload").addEventListener("click", () => $("file-el").click());
+$("file-el").addEventListener("change", async ev => {
+  const f = ev.target.files[0]; ev.target.value = ""; if (!f) return;
+  try { addEl("img", await processImage(f, 500, f.type === "image/png")); } catch (err) { showToast(err.message); }
+});
+document.addEventListener("keydown", ev => {
+  if ((ev.key !== "Delete" && ev.key !== "Backspace") || !sel || editing || !$("ied").hidden || !$("payModal").hidden) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)) return;
+  ev.preventDefault(); delSel();
+});
+$("saveProj").addEventListener("click", () => {
+  deselect(); flush();
+  const url = URL.createObjectURL(new Blob([JSON.stringify({ app:"marketweb", v:1, state, images, origs })], { type:"application/json" }));
+  const a = document.createElement("a"); a.href = url; a.download = "proyecto-marketweb.json"; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500); showToast("Proyecto guardado en un archivo.");
+});
+$("openProj").addEventListener("click", () => $("file-proj").click());
+$("file-proj").addEventListener("change", async ev => {
+  const f = ev.target.files[0]; ev.target.value = ""; if (!f) return;
+  if (f.size > 25 * 1024 * 1024) { showToast("El archivo es demasiado grande."); return; }
+  try {
+    const d = JSON.parse(await f.text()); if (!isObj(d) || d.app !== "marketweb") throw new Error("x");
+    const ok = v => typeof v === "string" && /^data:image\/(png|jpeg|webp);base64,/.test(v), im = isObj(d.images) ? d.images : {}, or = isObj(d.origs) ? d.origs : {};
+    state = normalizeState(d.state);
+    images = { logo: ok(im.logo) ? im.logo : "", hero: ok(im.hero) ? im.hero : "" }; origs = { logo: ok(or.logo) ? or.logo : "", hero: ok(or.hero) ? or.hero : "" };
+    saveImages(); saveOrigs(); setInputValues(); deselect(); changed(); showToast("Proyecto abierto.");
+  } catch (_) { showToast("Ese archivo no es un proyecto de marketWeb."); }
+});
+
+/* ---------- Campos, exportación y pago ---------- */
+ids.forEach(id => { const h = () => { readInputs(); changed(); }; $(id).addEventListener("input", h); $(id).addEventListener("change", h); });
+$("addService").addEventListener("click", () => {
+  if (parseLines(state.servicesText, 3).length >= 12) { showToast("Máximo 12 servicios."); return; }
+  state.servicesText = (state.servicesText.trim() ? state.servicesText.trim() + "\n" : "") + "Nuevo servicio | $0 | Detalle";
+  setInputValues(); changed();
+});
+$("devBtn").addEventListener("click", () => { const m = $("preview").classList.toggle("mobile"); $("devBtn").replaceChildren(icon(m ? "monitor" : "phone")); });
+$("resetBtn").addEventListener("click", () => {
+  if (!confirm("¿Restablecer la plantilla? Se perderán los cambios.")) return;
+  state = clone(defaults); images = { logo:"", hero:"" }; origs = { logo:"", hero:"" }; saveImages(); saveOrigs(); setInputValues(); deselect(); changed(); showToast("Plantilla restablecida.");
+});
+function exportDocument() {
+  deselect();
+  const c = $("site").cloneNode(true);
+  c.querySelectorAll(".site-section[hidden]").forEach(e => e.remove());
+  c.querySelectorAll("img[hidden]").forEach(e => e.remove());
+  c.querySelectorAll("*").forEach(e => { if (e.style && e.style.display === "none") e.remove(); });
+  const bookBox = c.querySelector(".book-box"); let bookScript = "";
+  if (bookBox) {
+    if (!bookBox.dataset.phone && !bookBox.dataset.link) bookBox.closest(".site-section").remove();
+    else { bookBox.removeAttribute("data-preview"); bookScript = "<scr" + "ipt>" + bookingInit.toString() + ";document.querySelectorAll('.book-box').forEach(bookingInit);<\/script>"; }
+  }
+  const waEl = c.querySelector(".wa-float"), waHtml = waEl && !waEl.hidden ? waEl.outerHTML : ""; if (waEl) waEl.remove();
+  c.removeAttribute("id");
+  c.querySelectorAll("[data-edit],[data-img],[data-el],[data-row],[contenteditable]").forEach(e => ["data-edit","data-img","data-el","data-row","contenteditable","spellcheck"].forEach(a => e.removeAttribute(a)));
+  c.querySelectorAll(".mw-sel,.mw-editing").forEach(e => e.classList.remove("mw-sel", "mw-editing"));
+  const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<meta name="theme-color" content="' + safeColor(state.darkColor, defaults.darkColor) + '"><meta name="description" content="' + escapeHtml(state.description.trim().slice(0, 160)) + '">' +
+    '<title>' + escapeHtml(state.businessName.trim() || "Mi negocio") + '</title><style>' + SITE_CSS + '</style></head><body>' + c.outerHTML + waHtml + bookScript + '</body></html>';
+  const url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
+  const a = document.createElement("a"); a.href = url; a.download = "mi-pagina-marketweb.html"; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500); showToast("Descarga iniciada. Abrí el archivo para probar tu página.");
+}
+const modal = $("payModal"), closePay = () => { modal.hidden = true; };
+$("exportBtn").addEventListener("click", () => { deselect(); modal.hidden = false; $("payClose").focus(); });
+$("payClose").addEventListener("click", closePay);
+modal.addEventListener("click", ev => { if (ev.target === modal) closePay(); });
+document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !modal.hidden) closePay(); });
+$("payMP").addEventListener("click", () => showToast("El pago con Mercado Pago se conecta en la etapa del backend."));
+$("paySim").addEventListener("click", () => { closePay(); exportDocument(); });
+
+/* ---------- Inicio ---------- */
+site.querySelectorAll('[data-edit^="t:"]').forEach(e => { TEXT_DEFAULTS[e.dataset.edit.slice(2)] = e.textContent.trim(); });
+setInputValues(); render(); buildCtx(); cur = snap(); btns();
+})();
+</script>
+</body>
+</html>
