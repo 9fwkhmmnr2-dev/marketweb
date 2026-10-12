@@ -1,0 +1,26 @@
+# marketWeb — paquete de integración
+
+## Contenido
+- `index.html`: catálogo actual conservado, con control de sesión antes de mostrarlo.
+- `auth.html`: login/registro y redirección al catálogo cuando la sesión está iniciada.
+- `editor.html`: editor existente, conservando el puente de nube y las funciones previas.
+- `cloud-projects.js`: operaciones de nube con validaciones y filtros por usuario.
+- `cloud-ui.js`: interfaz de nube existente con guardado automático agregado.
+
+## Antes de subir
+1. Hacé una copia de seguridad descargando los archivos actuales de la rama `integracion-nube-marketweb`.
+2. Subí estos archivos únicamente a esa rama, nunca a `main` directamente.
+3. Confirmá que `mw_projects` conserve las políticas RLS por `auth.uid() = user_id`.
+4. La clave incluida es la clave pública/publishable de Supabase; nunca agregues una service-role key al navegador.
+
+## Prueba después de subir
+1. Abrí la URL de preview de la rama.
+2. Sin sesión, el catálogo debe redirigir a `auth.html`.
+3. Iniciá sesión; debe volver al catálogo.
+4. Abrí la plantilla disponible y editá un texto.
+5. El guardado automático puede pedir un nombre la primera vez; luego debe actualizar ese mismo proyecto.
+6. Abrí «Mis proyectos en la nube», cargá el proyecto y verificá que reaparezcan los cambios.
+7. Probá cerrar sesión y entrar otra vez.
+
+## Importante
+Este paquete conserva el editor y catálogo que se pudieron recuperar, pero el guardado automático necesita prueba en la preview real antes de considerarlo verificado. La detección de cambios combina eventos del editor y revisión periódica; si alguna acción interna no genera cambios observables, usá también «Guardar en la nube» como respaldo.

@@ -155,6 +155,95 @@
     });
   }
 
+
+  /* ---------- guardado automático ---------- */
+  let autoLast = "";
+  let autoBusy = false;
+  let autoTimer = null;
+  let autoPrompted = false;
+  const autoStatus = el("p", "cl-msg");
+  autoStatus.id = "mwAutoSaveStatus";
+  autoStatus.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:80;background:#151F32;border:1px solid var(--line);border-radius:10px;padding:8px 12px;max-width:85vw;box-shadow:0 8px 24px #0008";
+  autoStatus.textContent = "Guardado automático listo";
+  document.body.append(autoStatus);
+
+  function autoSay(text, error = false) {
+    autoStatus.textContent = text;
+    autoStatus.style.color = error ? "#ff9db1" : "var(--ink)";
+  }
+  async function autosaveNow() {
+    if (autoBusy || document.visibilityState === "hidden") return;
+    let now;
+    try { now = snapshot(); } catch (_) { return; }
+    if (now === autoLast) return;
+    // Do not create an empty cloud record merely because the editor first loaded.
+    if (!current.id && !autoPrompted) {
+      const pd = ED.getProject();
+      const hasMeaningful = pd && pd.state && Object.values(pd.state).some(v =>
+        typeof v === "string" && v.trim() && !["Mi negocio", "Mi página"].includes(v.trim())
+      );
+      if (!hasMeaningful) { autoLast = now; return; }
+      autoPrompted = true;
+      const title = prompt("¿Cómo querés llamar a este proyecto para guardarlo automáticamente?", String(pd.state.businessName || "Mi página").trim().slice(0, 80));
+      if (title === null || !title.trim()) {
+        autoSay("Guardado automático pausado: poné un nombre desde «Guardar en la nube».");
+        autoLast = now;
+        return;
+      }
+      autoBusy = true;
+      autoSay("Guardando…");
+      try {
+        ED.commit();
+        const projectData = ED.getProject();
+        let html = ED.buildHtml();
+        if (bytes(html) > MAX_HTML) html = liteHtml(html);
+        if (bytes(html) > MAX_HTML || bytes(JSON.stringify(projectData)) > MAX_PROJECT) throw new Error("El proyecto supera el límite de tamaño.");
+        const a = await getApi();
+        const row = await a.saveProject({ title: title.trim().slice(0,80), html, projectData });
+        current.id = row.id; current.title = row.title; current.saved = JSON.stringify(projectData);
+        autoLast = snapshot(); updateStatus(); autoSay("Guardado");
+      } catch (e) { fail(autoStatus, e); autoSay("Error al guardar: " + String(e.message || "intentá de nuevo"), true); }
+      finally { autoBusy = false; }
+      return;
+    }
+    if (!current.id) return;
+    autoBusy = true;
+    autoSay("Guardando…");
+    try {
+      ED.commit();
+      const projectData = ED.getProject();
+      const json = JSON.stringify(projectData);
+      let html = ED.buildHtml();
+      if (bytes(html) > MAX_HTML) html = liteHtml(html);
+      if (bytes(html) > MAX_HTML || bytes(json) > MAX_PROJECT) throw new Error("El proyecto supera el límite de tamaño.");
+      const a = await getApi();
+      const row = await a.saveProject({ id: current.id, title: current.title, html, projectData });
+      current.id = row.id; current.title = row.title; current.saved = json;
+      autoLast = snapshot(); updateStatus(); autoSay("Guardado");
+    } catch (e) {
+      autoSay("Error al guardar. Tus cambios siguen en este editor; revisá la conexión.", true);
+    } finally { autoBusy = false; }
+  }
+  function scheduleAutosave() {
+    autoSay(current.id ? (dirty() ? "Cambios pendientes" : "Guardado") : "Cambios locales");
+    if (autoTimer) clearTimeout(autoTimer);
+    autoTimer = setTimeout(autosaveNow, 1500);
+  }
+  // The editor's controls and tabs may change without changing the URL; observe interactions.
+  document.addEventListener("input", scheduleAutosave, true);
+  document.addEventListener("change", scheduleAutosave, true);
+  document.addEventListener("click", e => {
+    if (e.target.closest("button,[role=tab],.tab")) scheduleAutosave();
+  }, true);
+  let lastPoll = "";
+  try { lastPoll = snapshot(); autoLast = lastPoll; } catch (_) {}
+  setInterval(() => {
+    try {
+      const s = snapshot();
+      if (s !== lastPoll) { lastPoll = s; scheduleAutosave(); }
+    } catch (_) {}
+  }, 1500);
+
   $("cloudSaveBtn").addEventListener("click", openSave);
   $("cloudListBtn").addEventListener("click", openList);
 })();

@@ -213,7 +213,20 @@ header{position:sticky;top:0;z-index:5;background:#0B1220cc;-webkit-backdrop-fil
   .nav2 .pill-nav{display:none}
 }
 </style>
-</head>
+<script type="module" id="mw-session-gate">\n
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const supabase = createClient("https://msxmhgxsjlgfdlhirikj.supabase.co","sb_publishable_6wS64xCMk4_073N2xbLJ4Q_1GYzALcq");
+try {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  if (!data.session) location.replace("auth.html");
+} catch (_) {
+  // Fail closed: if session verification cannot complete, do not expose the catalog.
+  location.replace("auth.html");
+}
+
+\n</script>\n</head>
 <body>
 <header><div class="wrap nav2">
   <a class="brand" href="#">market<span>Web</span></a>
