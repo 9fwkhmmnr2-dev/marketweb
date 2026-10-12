@@ -108,7 +108,7 @@ input[type=range]{width:100%;accent-color:#3867FF}
   <button class="ib" id="undoBtn" type="button" aria-label="Deshacer" data-icon="undo" disabled></button>
   <button class="ib" id="redoBtn" type="button" aria-label="Rehacer" data-icon="redo" disabled></button>
   <button class="ib" id="devBtn" type="button" aria-label="Cambiar entre celular y computadora" data-icon="phone"></button>
-  <button class="btn primary" id="exportBtn" type="button"><span class="long">Pagar y </span>descargar</button>
+  <button class="btn primary" id="exportBtn" type="button">Descargar</button>
 </div>
 
 <div class="canvas" id="canvas">
@@ -178,11 +178,12 @@ input[type=range]{width:100%;accent-color:#3867FF}
         <div class="color-field"><span>Fondo</span><input id="backgroundColor" type="color" aria-label="Color de fondo"></div>
         <div class="color-field"><span>Texto</span><input id="textColor" type="color" aria-label="Color de texto"></div>
         <div class="color-field"><span>Oscuro</span><input id="darkColor" type="color" aria-label="Color oscuro"></div>
-      </div>
+      </div><div class="chips"><button class="chip" id="copyColorBtn" type="button">Copiar color principal</button><button class="chip" id="applyColorBtn" type="button">Aplicar color copiado</button></div>
     </div>
     <div class="sg" data-tab="fuente" hidden>
       <div class="field"><label for="fontPair">Tipografía de toda la página</label>
-        <select id="fontPair"><option value="clasica">Clásica (serif + sans)</option><option value="moderna">Moderna (sans)</option><option value="elegante">Elegante (serif)</option><option value="fuerte">Fuerte (negrita impactante)</option></select></div>
+        <select id="fontPair"><option value="clasica">Clásica (serif + sans)</option><option value="moderna">Moderna (sans)</option><option value="elegante">Elegante (serif)</option><option value="fuerte">Fuerte (negrita impactante)</option><option value="manuscrita">Manuscrita</option><option value="editorial">Editorial</option><option value="minimal">Minimalista</option><option value="redonda">Redondeada</option></select></div>
+      <div id="fontPreview" style="border:1px solid var(--line);border-radius:10px;padding:14px;margin:8px 0 12px;background:#0B1220"><div style="font-size:10px;color:var(--muted);margin-bottom:6px">VISTA PREVIA</div><div id="fontPreviewHead" style="font-size:24px;font-weight:800">Tu marca, tu estilo</div><div id="fontPreviewBody" style="font-size:13px;margin-top:5px;color:var(--muted)">Diseñá una página con tu personalidad.</div></div>
       <p class="intro">Para cambiar la fuente de un solo texto, tocalo en la página y elegí «Fuente».</p>
     </div>
     <div class="sg" data-tab="imagenes" hidden>
@@ -196,7 +197,7 @@ input[type=range]{width:100%;accent-color:#3867FF}
       <div class="elgrid" id="elGrid"></div>
       <div style="height:12px"></div>
       <button class="btn" id="elUpload" type="button" data-icon="open">Cargar imagen propia</button>
-      <p class="intro" style="margin-top:10px">Tocá un elemento para agregarlo. Después tocalo en la página para cambiar su color, tamaño y posición.</p>
+      <p class="intro" style="margin-top:10px">Tocá un elemento para agregarlo. Las imágenes son capas libres: arrastralas por la página y redimensionalas desde cualquiera de las cuatro esquinas.</p>
     </div>
     <div class="sg" data-tab="secciones" hidden>
       <div class="section-list" id="sectionList"></div>
@@ -224,6 +225,9 @@ input[type=range]{width:100%;accent-color:#3867FF}
       <div class="field"><label for="businessName">Nombre del negocio</label><input id="businessName" type="text" maxlength="70"></div>
       <div class="field"><label for="whatsapp">WhatsApp (código de país, solo números)</label><input id="whatsapp" type="tel" inputmode="numeric" maxlength="16" placeholder="5492211234567"></div>
       <button class="btn" id="saveProj" type="button" data-icon="save">Guardar proyecto (archivo)</button>
+        <button class="btn" id="cloudSaveBtn" type="button">Guardar en la nube</button>
+  <div style="height:10px"></div>
+  <button class="btn" id="cloudListBtn" type="button">Mis proyectos en la nube</button>
       <div style="height:10px"></div>
       <button class="btn" id="openProj" type="button" data-icon="open">Abrir proyecto</button>
       <p class="intro" style="margin:8px 0 14px">El archivo guarda todo: textos, estilos, fotos y elementos.</p>
@@ -301,7 +305,7 @@ img[hidden]{display:none!important}
 .book-ext{justify-self:start;font-size:13px;font-weight:700;color:var(--primary)}
 .book-form[hidden],.book-ext[hidden]{display:none!important}
 @container (max-width:650px){.booking{padding:42px 7%}}
-.el{grid-column:1/-1;display:flex;margin:14px 0}
+.site{position:relative}.el{grid-column:1/-1;display:flex;margin:14px 0}.el.el-free-image{position:absolute;display:block;margin:0;min-width:28px;touch-action:none;cursor:move;z-index:var(--layer,10)}.el-free-image img{display:block;width:100%;height:auto;max-width:none;pointer-events:none}.el-free-image .mw-resize-handle{position:absolute;width:14px;height:14px;border:2px solid #fff;background:#3867FF;border-radius:50%;z-index:5;touch-action:none}.el-free-image .mw-resize-handle[data-h="nw"]{left:-7px;top:-7px;cursor:nwse-resize}.el-free-image .mw-resize-handle[data-h="ne"]{right:-7px;top:-7px;cursor:nesw-resize}.el-free-image .mw-resize-handle[data-h="sw"]{left:-7px;bottom:-7px;cursor:nesw-resize}.el-free-image .mw-resize-handle[data-h="se"]{right:-7px;bottom:-7px;cursor:nwse-resize}.el-free-image.mw-sel{outline:2px solid #3867FF!important;outline-offset:2px}
 .el svg,.el img{display:block;max-width:100%;height:auto}
 .site-logo{display:flex;align-items:center;gap:6px}
 .site-logo img{display:block;max-height:38px;max-width:170px;object-fit:contain}
@@ -334,12 +338,16 @@ img[hidden]{display:none!important}
 $("siteCss").textContent = SITE_CSS;
 
 const FONTS = {
+  manuscrita: { head: "\"Brush Script MT\",\"Segoe Script\",cursive", body: "system-ui,-apple-system,\"Segoe UI\",sans-serif" },
+  editorial: { head: "\"Palatino Linotype\",Palatino,Georgia,serif", body: "\"Trebuchet MS\",Arial,sans-serif" },
+  minimal: { head: "\"Helvetica Neue\",Arial,sans-serif", body: "\"Helvetica Neue\",Arial,sans-serif" },
+  redonda: { head: "\"Trebuchet MS\",Verdana,sans-serif", body: "Verdana,Arial,sans-serif" },
   clasica:  { head: 'Georgia,"Times New Roman",serif', body: 'Arial,Helvetica,sans-serif' },
   moderna:  { head: 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', body: 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif' },
   elegante: { head: '"Palatino Linotype",Palatino,"Book Antiqua",serif', body: 'Georgia,"Times New Roman",serif' },
   fuerte:   { head: '"Arial Black","Helvetica Neue",Impact,sans-serif', body: 'Arial,Helvetica,sans-serif' }
 };
-const FONT_NAMES = { clasica:"Clásica", moderna:"Moderna", elegante:"Elegante", fuerte:"Fuerte" };
+const FONT_NAMES = { clasica:"Clásica", moderna:"Moderna", elegante:"Elegante", fuerte:"Fuerte", manuscrita:"Manuscrita", editorial:"Editorial", minimal:"Minimalista", redonda:"Redondeada" };
 const SLOTS = [{ key:"logo", label:"Logo", max:400, alpha:true }, { key:"hero", label:"Foto principal", max:1200, alpha:false }];
 const TABS = [["colores","palette","Colores"],["fuente","type","Fuente"],["imagenes","image","Imágenes"],["elementos","shapes","Elementos"],["secciones","layers","Secciones"],
   ["servicios","scissors","Servicios"],["horarios","clock","Horarios"],["turnos","calendar","Turnos"],["ajustes","gear","Ajustes"]];
@@ -353,7 +361,7 @@ const defaults = {
   showNav:true, showFooter:true, showWhats:true,
   bookSlots:"09:00, 10:00, 11:00, 12:00, 15:00, 16:00, 17:00, 18:00", bookLink:"",
   bd0:false, bd1:true, bd2:true, bd3:true, bd4:true, bd5:true, bd6:true,
-  texts:{}, styles:{}, secBg:{}, boxes:{}, imgEdits:{}, els:[],
+  texts:{}, styles:{}, secBg:{}, boxes:{}, imgEdits:{}, els:[], sectionCopies:[],
   sections:[{id:"hero",label:"Portada",visible:true},{id:"services",label:"Servicios",visible:true},{id:"booking",label:"Turnos",visible:true},{id:"hours",label:"Horarios",visible:true},{id:"contact",label:"Contacto",visible:true}]
 };
 const ids = ["businessName","tagline","description","whatsapp","fontPair","primaryColor","backgroundColor","textColor","darkColor","servicesText","hoursText","showNav","showFooter","showWhats","bookSlots","bookLink","bd0","bd1","bd2","bd3","bd4","bd5","bd6"];
@@ -394,19 +402,38 @@ function normEls(a) {
   return a.filter(e => e && typeof e === "object" && /^e\d{1,6}$/.test(e.id)).slice(0, 30).map(e => ({
     id: e.id, t: (e.t === "img" || ELIB.some(x => x[0] === e.t)) ? e.t : "rect", c: safeColor(e.c, "#b88a55"), w: nz(e.w, 16, 600, 80),
     a: ["left","center","right"].includes(e.a) ? e.a : "center", s: EL_SECS.includes(e.s) ? e.s : "hero",
+    x: nz(e.x, 0, 100, 8), y: nz(e.y, 0, 100, 10), z: nz(e.z, 1, 999, 20),
     src: (typeof e.src === "string" && /^data:image\/(png|jpeg|webp);base64,/.test(e.src) && e.src.length < 900000) ? e.src : ""
   })).filter(e => e.t !== "img" || e.src);
 }
-let state = loadState(), images = loadImages(), origs = loadOrigs(), toastTimer, sel = null, editing = null, ctxSub = null, activeTab = null;
+let state = loadState(), images = loadImages(), origs = loadOrigs(), toastTimer, sel = null, editing = null, ctxSub = null, activeTab = null, copiedTextStyle = null, copiedColor = null;
 const TEXT_DEFAULTS = {};
 
 function loadState() { try { return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}")); } catch (_) { return clone(defaults); } }
+function sanitizeSectionCopy(html, id) {
+  const t = document.createElement("template");
+  t.innerHTML = String(html || "").slice(0, 120000);
+  t.content.querySelectorAll("script,iframe,object,embed,base,meta,link").forEach(n => n.remove());
+  t.content.querySelectorAll("*").forEach(n => {
+    [...n.attributes].forEach(a => {
+      const k = a.name.toLowerCase(), v = a.value.trim().toLowerCase();
+      if (k.startsWith("on") || ((k === "href" || k === "src" || k === "xlink:href") && v.startsWith("javascript:"))) n.removeAttribute(a.name);
+      if (k === "id") n.removeAttribute(a.name);
+      if (k === "data-bind") n.removeAttribute(a.name);
+    });
+  });
+  const root = t.content.firstElementChild;
+  if (!root || !root.matches("section")) return "";
+  root.dataset.section = "copy-" + id; root.dataset.copySection = id; root.id = "mw-copy-" + id;
+  return root.outerHTML;
+}
 function normalizeState(saved) {
   try {
     const r = { ...clone(defaults), ...(isObj(saved) ? saved : {}) };
     if (!FONTS[r.fontPair]) r.fontPair = "clasica";
     ["texts","styles","secBg","boxes","imgEdits"].forEach(k => { if (!isObj(r[k])) r[k] = {}; });
     r.els = normEls(r.els);
+    r.sectionCopies = (Array.isArray(r.sectionCopies) ? r.sectionCopies : []).filter(c => c && /^sc\d{1,4}$/.test(c.id) && typeof c.html === "string" && c.html.length < 120000).slice(0, 20).map(c => ({id:c.id, html:sanitizeSectionCopy(c.html, c.id)}));
     r.sections = (Array.isArray(r.sections) ? r.sections : []).filter(s => s && LABELS[s.id]).map(s => ({ id:s.id, label:LABELS[s.id], visible:s.visible !== false }));
     for (const s of defaults.sections) if (!r.sections.some(i => i.id === s.id)) r.sections.push({ ...s });
     return r;
@@ -621,6 +648,9 @@ function readInputs() {
 }
 function render() {
   const site = $("site"), name = state.businessName.trim() || "Tu negocio", font = FONTS[state.fontPair] || FONTS.clasica;
+  if ($("fontPreviewHead")) $("fontPreviewHead").style.fontFamily = font.head;
+  if ($("fontPreviewBody")) $("fontPreviewBody").style.fontFamily = font.body;
+  site.querySelectorAll("[data-copy-section]").forEach(n => n.remove());
   site.style.setProperty("--primary", safeColor(state.primaryColor, defaults.primaryColor));
   site.style.setProperty("--background", safeColor(state.backgroundColor, defaults.backgroundColor));
   site.style.setProperty("--text", safeColor(state.textColor, defaults.textColor));
@@ -644,6 +674,14 @@ function render() {
   state.sections.forEach(s => { const e = map.get(s.id); if (e) { e.hidden = !s.visible; frag.append(e); } });
   frag.append(footer); site.append(frag);
   map.forEach((e, id) => { e.style.background = HEX.test(state.secBg[id] || "") ? state.secBg[id] : ""; });
+  state.sectionCopies.forEach(copy => {
+    const html = sanitizeSectionCopy(copy.html, copy.id); if (!html) return;
+    const t = document.createElement("template"); t.innerHTML = html;
+    const node = t.content.firstElementChild; if (!node) return;
+    node.querySelectorAll("[data-edit^=\"t:\"]").forEach(el => { const k = el.dataset.edit.slice(2); if (state.texts[k] !== undefined) el.textContent = state.texts[k]; else if (TEXT_DEFAULTS[k] !== undefined) el.textContent = TEXT_DEFAULTS[k]; });
+    if (HEX.test(state.secBg[node.dataset.section] || "")) node.style.background = state.secBg[node.dataset.section];
+    footer.before(node);
+  });
   applyImages(name); renderBooking(name); renderSlots(); renderServices(); renderHours(); renderSectionsList(); renderEls();
   applyStyles(); applyBoxes(); reselect(); persist();
 }
@@ -812,6 +850,29 @@ function rowOp(op) {
   else { rows.splice(idx, 1); if (sel.el) sel.el.classList.remove("mw-sel"); sel = null; }
   state[field] = joinRows(rows); setInputValues(); changed(); buildCtx();
 }
+function duplicateSection() {
+  if (!sel || sel.kind !== "sec" || !sel.el) return;
+  if (state.sectionCopies.length >= 20) { showToast("Máximo 20 secciones duplicadas."); return; }
+  const n = Math.max(0, ...state.sectionCopies.map(c => +c.id.slice(2))) + 1, id = "sc" + n;
+  const source = sel.el, copy = source.cloneNode(true); copy.dataset.section = "copy-" + id; copy.dataset.copySection = id; copy.id = "mw-copy-" + id;
+  copy.querySelectorAll("[data-bind]").forEach(el => el.removeAttribute("data-bind"));
+  copy.querySelectorAll("[data-row]").forEach(el => el.removeAttribute("data-row"));
+  let textIndex = 0;
+  copy.querySelectorAll("[data-edit]").forEach(el => {
+    const oldKey = el.dataset.edit, newKey = "t:" + id + "_" + (textIndex++);
+    const txt = (el.textContent || "").trim();
+    const oldStyleKey = styleKey(oldKey), newStyleKey = styleKey(newKey);
+    if (state.styles[oldStyleKey]) state.styles[newStyleKey] = clone(state.styles[oldStyleKey]);
+    state.texts[newKey.slice(2)] = txt; TEXT_DEFAULTS[newKey.slice(2)] = txt; el.dataset.edit = newKey;
+  });
+  const clean = sanitizeSectionCopy(copy.outerHTML, id);
+  if (!clean) { showToast("No se pudo duplicar esta sección."); return; }
+  state.sectionCopies.push({id, html:clean});
+  const bg = state.secBg[sel.key] || toHex(getComputedStyle(source).backgroundColor, "#ffffff");
+  if (HEX.test(bg)) state.secBg["copy-" + id] = bg;
+  changed(); select({kind:"sec",key:"copy-" + id,el:null});
+  showToast("Sección duplicada. El contenido y el diseño se guardaron en el proyecto.");
+}
 function hideSection() {
   const id = sel.key, i = state.sections.findIndex(s => s.id === id);
   if (i >= 0) state.sections[i].visible = false; else if (id === "nav") state.showNav = false; else if (id === "footer") state.showFooter = false;
@@ -862,6 +923,8 @@ function buildCtx() {
     box.append(cb("Editar", startEdit, undefined, "edit"), cb("Fuente", () => { ctxSub = "font"; buildCtx(); }, undefined, "type"), cb("A−", () => bump(-2)), cb("A+", () => bump(2)));
     box.append(colorBtn("Color", toHex(cs.color, "#000000"), v => setSt({ color: v }), "palette"), cb("Negrita", () => setSt({ weight: bold ? "400" : "800" }), bold, "bold"));
     box.append(cb({ left:"Izquierda", center:"Centro", right:"Derecha" }[al], () => setSt({ align: { left:"center", center:"right", right:"left" }[al] }), undefined, { left:"alignL", center:"alignC", right:"alignR" }[al]));
+    box.append(cb("Copiar estilo", () => { const cs = getComputedStyle(sel.el), base = clone(state.styles[styleKey(sel.key)] || {}); base.color = toHex(cs.color, "#000000"); base.weight = parseInt(cs.fontWeight,10) >= 600 ? "800" : "400"; if (["left","center","right"].includes(cs.textAlign)) base.align = cs.textAlign; const ff = cs.fontFamily; const match = Object.keys(FONTS).find(f => FONTS[f].head.split(",")[0].replace(/[\"']/g, "").toLowerCase() === ff.split(",")[0].replace(/[\"']/g, "").toLowerCase()); if(match) base.font = match; base.size = Math.max(8, Math.min(120, Math.round(parseFloat(cs.fontSize) * 1000 / Math.max(1, site.clientWidth)))); copiedTextStyle = base; showToast("Estilo copiado. Seleccioná otro texto y tocá Aplicar estilo."); }, undefined, "copy"));
+    if (copiedTextStyle) box.append(cb("Aplicar estilo", () => { state.styles[styleKey(sel.key)] = clone(copiedTextStyle); changed(); buildCtx(); showToast("Estilo aplicado."); }, undefined, "check"));
     box.append(cb("Efectos", toggleFx, undefined, "sparkle"));
     if (Object.keys(st).length) box.append(cb("Normal", () => { delete state.styles[styleKey(sel.key)]; changed(); }, undefined, "reset"));
     if (sel.key === "b:businessName") box.append(cb("Logo", () => $("file-logo").click(), undefined, "image"));
@@ -880,6 +943,7 @@ function buildCtx() {
     const L = { left:"Izquierda", center:"Centro", right:"Derecha" }, I = { left:"alignL", center:"alignC", right:"alignR" }, N = { left:"center", center:"right", right:"left" };
     if (e.t !== "img") box.append(colorBtn("Color", e.c, v => setEl({ c: v }), "palette"));
     box.append(cb("Menos", () => setEl({ w: Math.max(16, e.w - 16) }), undefined, "minus"), cb("Más", () => setEl({ w: Math.min(600, e.w + 16) }), undefined, "plus"));
+    if (e.t === "img") { box.append(cb("Traer adelante", () => setEl({ z: Math.min(999, e.z + 1) }), undefined, "up"), cb("Enviar atrás", () => setEl({ z: Math.max(1, e.z - 1) }), undefined, "down")); }
     box.append(cb(L[e.a], () => { setEl({ a: N[e.a] }); buildCtx(); }, undefined, I[e.a]));
     box.append(cb("Subir", () => moveEl(-1), undefined, "up"), cb("Bajar", () => moveEl(1), undefined, "down"), cb("Duplicar", dupEl, undefined, "copy"));
     box.append(cb("Efectos", toggleFx, undefined, "sparkle"), cb("Eliminar", delSel, undefined, "trash"));
@@ -888,6 +952,7 @@ function buildCtx() {
     box.append(colorBtn("Fondo", toHex(getComputedStyle(sel.el).backgroundColor, "#ffffff"), v => { state.secBg[id] = v; changed(); }, "palette"));
     if (state.secBg[id]) box.append(cb("Sin fondo", () => { delete state.secBg[id]; changed(); buildCtx(); }, undefined, "reset"));
     if (i >= 0) { const u = cb("Subir", () => moveSection(i, -1), undefined, "up"), d = cb("Bajar", () => moveSection(i, 1), undefined, "down"); u.disabled = i === 0; d.disabled = i === state.sections.length - 1; box.append(u, d); }
+    box.append(cb("Duplicar sección", duplicateSection, undefined, "copy"));
     box.append(cb("Efectos", toggleFx, undefined, "sparkle"), cb("Eliminar", delSel, undefined, "trash"));
   } else {
     const k = sel.key, b = state.boxes[k] || {};
@@ -1153,12 +1218,35 @@ function renderEls() {
   state.els.forEach(e => {
     const sec = $("site").querySelector('[data-section="' + e.s + '"]'); if (!sec) return;
     const w = document.createElement("div"); w.className = "el"; w.dataset.el = e.id; w.style.justifyContent = { left:"flex-start", center:"center", right:"flex-end" }[e.a];
-    if (e.t === "img") { const i = document.createElement("img"); i.src = e.src; i.alt = ""; i.style.width = e.w + "px"; w.append(i); }
-    else { const sv = elSvg(ELIB.find(x => x[0] === e.t)); sv.style.width = e.w + "px"; w.style.color = e.c; w.append(sv); }
+    if (e.t === "img") {
+      w.classList.add("el-free-image"); w.style.left = e.x + "%"; w.style.top = e.y + "%"; w.style.width = e.w + "px"; w.style.setProperty("--layer", e.z);
+      const i = document.createElement("img"); i.src = e.src; i.alt = ""; w.append(i);
+      if (sel && sel.kind === "el" && sel.key === e.id) { ["nw","ne","sw","se"].forEach(pos => { const h = document.createElement("span"); h.className = "mw-resize-handle"; h.dataset.h = pos; h.setAttribute("aria-label", "Cambiar tamaño desde la esquina " + pos); w.append(h); }); }
+    } else { const sv = elSvg(ELIB.find(x => x[0] === e.t)); sv.style.width = e.w + "px"; w.style.color = e.c; w.append(sv); }
     sec.append(w);
   });
 }
 function setEl(p) { const e = state.els.find(x => x.id === sel.key); if (e) { Object.assign(e, p); changed(); } }
+// Drag image layers directly on the canvas; the bottom-right handle resizes them.
+let imageGesture = null;
+site.addEventListener("pointerdown", ev => {
+  const wrap = ev.target.closest && ev.target.closest(".el-free-image"); if (!wrap) return;
+  const item = state.els.find(x => x.id === wrap.dataset.el); if (!item) return;
+  ev.preventDefault(); ev.stopPropagation(); select({kind:"el",key:item.id,el:wrap});
+  const handle = ev.target.closest(".mw-resize-handle"), resize = Boolean(handle);
+  imageGesture = { id:item.id, pointerId:ev.pointerId, startX:ev.clientX, startY:ev.clientY, x:item.x, y:item.y, w:item.w, resize, handle:handle && handle.dataset.h, root:site };
+  try { wrap.setPointerCapture(ev.pointerId); } catch (_) {}
+});
+function nodeSafeImage(root,id){const n=root.querySelector("[data-el=\""+id+"\"] img");return n||null;}
+site.addEventListener("pointermove", ev => {
+  if (!imageGesture || ev.pointerId !== imageGesture.pointerId) return;
+  const g=imageGesture, item=state.els.find(x=>x.id===g.id), r=g.root.getBoundingClientRect(); if(!item||!r.width) return;
+  if(g.resize) { item.w=Math.max(30,Math.min(900,g.w+(ev.clientX-g.startX)*(g.handle.includes("w")?-1:1))); if(g.handle.includes("w")) item.x=Math.max(0,Math.min(100,g.x+(g.w-item.w)/r.width*100)); const img=nodeSafeImage(site,g.id); const ratio=img&&img.naturalWidth?img.naturalHeight/img.naturalWidth:0.6; if(g.handle.includes("n")) item.y=Math.max(0,Math.min(100,g.y+(g.w-item.w)*ratio/Math.max(1,r.height)*100)); }
+  else { item.x=Math.max(0,Math.min(95,g.x+(ev.clientX-g.startX)/r.width*100)); item.y=Math.max(0,Math.min(95,g.y+(ev.clientY-g.startY)/Math.max(1,r.height)*100)); }
+  const node=site.querySelector('[data-el="'+g.id+'"]'); if(node){node.style.left=item.x+'%';node.style.top=item.y+'%';node.style.width=item.w+'px';}
+});
+function finishImageGesture(ev){if(!imageGesture||ev.pointerId!==imageGesture.pointerId)return;imageGesture=null;changed();buildCtx();}
+site.addEventListener("pointerup",finishImageGesture); site.addEventListener("pointercancel",finishImageGesture);
 function moveEl(d) {
   const L = state.els, i = L.findIndex(x => x.id === sel.key); if (i < 0) return;
   let j = i + d; while (j >= 0 && j < L.length && L[j].s !== L[i].s) j += d;
@@ -1167,7 +1255,7 @@ function moveEl(d) {
 function addEl(t, src) {
   if (state.els.length >= 30) { showToast("Máximo 30 elementos."); return; }
   const n = Math.max(0, ...state.els.map(x => +x.id.slice(1))) + 1;
-  const e = { id: "e" + n, t, c: safeColor($("elColor").value, "#b88a55"), w: t === "img" ? 200 : 80, a: "center", s: EL_SECS.includes($("elSec").value) ? $("elSec").value : "hero", src: src || "" };
+  const e = { id: "e" + n, t, c: safeColor($("elColor").value, "#b88a55"), w: t === "img" ? 200 : 80, a: "center", s: EL_SECS.includes($("elSec").value) ? $("elSec").value : "hero", x: 8 + (state.els.length % 4) * 4, y: 12 + (state.els.length % 5) * 5, z: 20 + state.els.length, src: src || "" };
   state.els.push(e); changed(); select({ kind: "el", key: e.id, el: null });
   const x = $("site").querySelector('[data-el="' + e.id + '"]'); if (x) x.scrollIntoView({ block: "center", behavior: "smooth" });
 }
@@ -1179,7 +1267,7 @@ function dupEl() {
 }
 function delSel() {
   if (!sel) return;
-  if (sel.kind === "sec") { hideSection(); showToast("Sección eliminada. Podés recuperarla en Secciones o con Deshacer."); return; }
+  if (sel.kind === "sec") { if (sel.key.startsWith("copy-")) { const id = sel.key.slice(5); state.sectionCopies = state.sectionCopies.filter(c => c.id !== id); delete state.secBg[sel.key]; deselect(); changed(); showToast("Copia de sección eliminada."); } else { hideSection(); showToast("Sección eliminada. Podés recuperarla en Secciones o con Deshacer."); } return; }
   if (sel.kind === "el") { state.els = state.els.filter(x => x.id !== sel.key); deselect(); changed(); }
   else { setBox({ hide: true }); deselect(); }
   showToast("Eliminado. Podés recuperarlo con Deshacer.");
@@ -1229,7 +1317,7 @@ $("resetBtn").addEventListener("click", () => {
   if (!confirm("¿Restablecer la plantilla? Se perderán los cambios.")) return;
   state = clone(defaults); images = { logo:"", hero:"" }; origs = { logo:"", hero:"" }; saveImages(); saveOrigs(); setInputValues(); deselect(); changed(); showToast("Plantilla restablecida.");
 });
-function exportDocument() {
+function buildExportHtml() {
   deselect();
   const c = $("site").cloneNode(true);
   c.querySelectorAll(".site-section[hidden]").forEach(e => e.remove());
@@ -1242,27 +1330,53 @@ function exportDocument() {
   }
   const waEl = c.querySelector(".wa-float"), waHtml = waEl && !waEl.hidden ? waEl.outerHTML : ""; if (waEl) waEl.remove();
   c.removeAttribute("id");
-  c.querySelectorAll("[data-edit],[data-img],[data-el],[data-row],[contenteditable]").forEach(e => ["data-edit","data-img","data-el","data-row","contenteditable","spellcheck"].forEach(a => e.removeAttribute(a)));
+  c.querySelectorAll("[data-edit],[data-img],[data-el],[data-row],[data-copy-section],[contenteditable]").forEach(e => ["data-edit","data-img","data-el","data-row","data-copy-section","contenteditable","spellcheck"].forEach(a => e.removeAttribute(a)));
+  c.querySelectorAll("[data-section^=\"copy-\"]").forEach(e => e.removeAttribute("data-section"));
   c.querySelectorAll(".mw-sel,.mw-editing").forEach(e => e.classList.remove("mw-sel", "mw-editing"));
+  c.querySelectorAll(".mw-resize-handle").forEach(e => e.remove());
   const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<meta name="theme-color" content="' + safeColor(state.darkColor, defaults.darkColor) + '"><meta name="description" content="' + escapeHtml(state.description.trim().slice(0, 160)) + '">' +
     '<title>' + escapeHtml(state.businessName.trim() || "Mi negocio") + '</title><style>' + SITE_CSS + '</style></head><body>' + c.outerHTML + waHtml + bookScript + '</body></html>';
+  return html;
+}
+function exportDocument() {
+  const html = buildExportHtml();
   const url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
   const a = document.createElement("a"); a.href = url; a.download = "mi-pagina-marketweb.html"; document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1500); showToast("Descarga iniciada. Abrí el archivo para probar tu página.");
 }
 const modal = $("payModal"), closePay = () => { modal.hidden = true; };
-$("exportBtn").addEventListener("click", () => { deselect(); modal.hidden = false; $("payClose").focus(); });
+$("exportBtn").addEventListener("click", () => { closePay(); exportDocument(); });
 $("payClose").addEventListener("click", closePay);
 modal.addEventListener("click", ev => { if (ev.target === modal) closePay(); });
 document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !modal.hidden) closePay(); });
 $("payMP").addEventListener("click", () => showToast("El pago con Mercado Pago se conecta en la etapa del backend."));
 $("paySim").addEventListener("click", () => { closePay(); exportDocument(); });
 
+/* ---------- Puente para la nube (cloud-ui.js) ---------- */
+window.__mwEditor = Object.freeze({
+  commit() { deselect(); flush(); },
+  getProject() { return { app:"marketweb", v:1, state: clone(state), images: { ...images }, origs: { ...origs } }; },
+  buildHtml: buildExportHtml,
+  setProject(d) {
+    if (!isObj(d) || d.app !== "marketweb" || !isObj(d.state)) throw new Error("Formato de proyecto no válido.");
+    const ok = v => typeof v === "string" && /^data:image\/(png|jpeg|webp);base64,/.test(v), im = isObj(d.images) ? d.images : {}, or = isObj(d.origs) ? d.origs : {};
+    deselect(); flush();
+    state = normalizeState(d.state);
+    images = { logo: ok(im.logo) ? im.logo : "", hero: ok(im.hero) ? im.hero : "" };
+    origs = { logo: ok(or.logo) ? or.logo : "", hero: ok(or.hero) ? or.hero : "" };
+    saveImages(); saveOrigs(); setInputValues(); deselect(); changed();
+  },
+  toast: showToast
+});
+
 /* ---------- Inicio ---------- */
 site.querySelectorAll('[data-edit^="t:"]').forEach(e => { TEXT_DEFAULTS[e.dataset.edit.slice(2)] = e.textContent.trim(); });
+$("copyColorBtn").addEventListener("click", () => { copiedColor = $("primaryColor").value; showToast("Color copiado: " + copiedColor); });
+$("applyColorBtn").addEventListener("click", () => { if (!copiedColor) return showToast("Primero copiá un color."); if (sel && sel.kind === "text") setSt({ color: copiedColor }); else if (sel && sel.kind === "el") setEl({ c: copiedColor }); else if (sel && sel.kind === "sec") { state.secBg[sel.key] = copiedColor; changed(); buildCtx(); } else { state.primaryColor = copiedColor; $("primaryColor").value = copiedColor; changed(); } showToast("Color aplicado."); });
 setInputValues(); render(); buildCtx(); cur = snap(); btns();
 })();
 </script>
+<script type="module" src="cloud-ui.js"></script>
 </body>
 </html>

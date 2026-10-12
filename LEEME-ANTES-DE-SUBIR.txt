@@ -1,0 +1,50 @@
+# marketWeb — paquete de integración
+
+## Contenido
+- `index.html`: catálogo actual con control de sesión y carga de `templates.js`.
+- `templates.js`: registro separado de las fichas del catálogo; permite sumar tarjetas sin rehacer el HTML del catálogo.
+- `auth.html`: login/registro y redirección al catálogo cuando la sesión está iniciada.
+- `editor.html`: editor existente, conservando el puente de nube y las funciones previas.
+- `cloud-projects.js`: operaciones de nube con validaciones y filtros por usuario.
+- `cloud-ui.js`: interfaz de nube existente con guardado automático agregado.
+
+## Antes de subir
+1. Hacé una copia de seguridad descargando los archivos actuales de la rama `integracion-nube-marketweb`.
+2. Subí estos archivos únicamente a esa rama, nunca a `main` directamente.
+3. Confirmá que `mw_projects` conserve las políticas RLS por `auth.uid() = user_id`.
+4. La clave incluida es la clave pública/publishable de Supabase; nunca agregues una service-role key al navegador.
+
+## Prueba después de subir
+1. Abrí la URL de preview de la rama.
+2. Sin sesión, el catálogo debe redirigir a `auth.html`.
+3. Iniciá sesión; debe volver al catálogo.
+4. Abrí la plantilla disponible y editá un texto.
+5. El guardado automático puede pedir un nombre la primera vez; luego debe actualizar ese mismo proyecto.
+6. Abrí «Mis proyectos en la nube», cargá el proyecto y verificá que reaparezcan los cambios.
+7. Probá cerrar sesión y entrar otra vez.
+
+## Importante
+Este paquete conserva el editor y catálogo que se pudieron recuperar, pero el guardado automático necesita prueba en la preview real antes de considerarlo verificado. La detección de cambios combina eventos del editor y revisión periódica; si alguna acción interna no genera cambios observables, usá también «Guardar en la nube» como respaldo.
+
+
+CAMBIOS ADICIONALES DE ESTA VERSIÓN
+- El catálogo ahora lee la lista desde templates.js. Para sumar una ficha al catálogo, agregá un objeto siguiendo el formato existente en ese archivo. ready:true abre el editor genérico; no convierte automáticamente una plantilla “Próximamente” en un diseño funcional distinto.
+- Se agregaron opciones de tipografía (manuscrita, editorial, minimalista y redondeada) con vista previa. La disponibilidad visual depende de las fuentes instaladas en el dispositivo.
+- Se agregó duplicación de secciones; las copias y sus textos se guardan junto con el proyecto y salen en el HTML exportado.
+- Las imágenes añadidas desde Elementos se comportan como capas libres sobre la página: se pueden arrastrar, redimensionar desde la esquina y ordenar por capas.
+- Se añadió copiar/aplicar color y copiar/aplicar estilo de texto.
+- El indicador de autoguardado ahora es más pequeño y discreto; los errores siguen visibles.
+
+IMPORTANTE: antes de reemplazar archivos en GitHub, comparar con la rama integracion-nube-marketweb actual. Esta actualización parte del ZIP recuperado y necesita prueba funcional en Preview, especialmente arrastrar/redimensionar imágenes, exportación y carga de proyectos guardados.
+
+
+## Antes de reemplazar archivos en GitHub
+Este paquete se armó desde la copia de trabajo recuperada, no desde un commit nuevo de GitHub: el conector de GitHub permitió leer el repositorio, pero rechazó la escritura por permisos (403). Compará primero estos archivos con la rama `integracion-nube-marketweb` y guardá una copia de seguridad. No subas `patch.py`; es solo un script auxiliar de preparación.
+
+## Prueba obligatoria en Preview
+1. Abrí el editor y agregá una imagen desde **Elementos → Cargar imagen propia**. Arrastrala, redimensionala y probá traerla adelante/mandarla atrás.
+2. Seleccioná una sección y tocá **Duplicar sección**; editá el texto de la copia, guardá en la nube, recargá el proyecto y comprobá que la copia siga ahí.
+3. Copiá/aplicá un estilo de texto y un color.
+4. Cambiá la tipografía y mirá la vista previa.
+5. Descargá el HTML y comprobá que conserve imágenes y secciones duplicadas, sin controles del editor.
+6. Comprobá que el indicador de guardado no tape los controles y que los errores sigan visibles.
