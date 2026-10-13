@@ -243,7 +243,6 @@ input[type=range]{width:100%;accent-color:#3867FF}
   <h3 id="payTitle">Descargá tu página</h3><p>Plantilla Barbería · pago único</p><div class="mw-price">US$ 0,90</div>
   <p>Incluye el archivo HTML de tu página, sin la marca de marketWeb.</p>
   <button class="btn primary" id="payMP" type="button">Pagar con Mercado Pago</button>
-  <button class="btn" id="paySim" type="button">Simular pago (solo pruebas)</button>
   <button class="mw-close" id="payClose" type="button">Seguir editando</button>
 </div></div>
 <div class="ied" id="ied" hidden role="dialog" aria-modal="true" aria-label="Editar imagen">
@@ -1313,9 +1312,6 @@ $("payMP").addEventListener("click", async () => {
     button.textContent = "Pagar con Mercado Pago";
   }
 });
-
-$("paySim").addEventListener("click", () => { closePay(); exportDocument(); });
-
 /* ---------- Puente para la nube (cloud-ui.js) ---------- */
 window.__mwEditor = Object.freeze({
   commit() { deselect(); flush(); },
