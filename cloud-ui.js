@@ -163,29 +163,14 @@
   let autoPrompted = false;
   const autoStatus = el("p", "cl-msg");
   autoStatus.id = "mwAutoSaveStatus";
-  
+  autoStatus.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:80;background:#151F32;border:1px solid var(--line);border-radius:10px;padding:8px 12px;max-width:85vw;box-shadow:0 8px 24px #0008";
   autoStatus.textContent = "Guardado automático listo";
   document.body.append(autoStatus);
 
-  autoStatus.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:80;background:#151F32eF;border:1px solid var(--line);border-radius:8px;padding:5px 8px;max-width:75vw;font-size:11px;line-height:1.25;box-shadow:0 4px 14px #0005;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .25s ease,transform .25s ease";
-  autoStatus.textContent = "";
-  document.body.append(autoStatus);
-  let autoHideTimer = null;
-
   function autoSay(text, error = false) {
-    if (autoHideTimer) clearTimeout(autoHideTimer);
     autoStatus.textContent = text;
     autoStatus.style.color = error ? "#ff9db1" : "var(--ink)";
-    autoStatus.style.opacity = "1";
-    autoStatus.style.transform = "translateY(0)";
-    if (!error && text !== "Guardando…") {
-      autoHideTimer = setTimeout(() => {
-        autoStatus.style.opacity = "0";
-        autoStatus.style.transform = "translateY(4px)";
-      }, 1500);
-    }
   }
-
   async function autosaveNow() {
     if (autoBusy || document.visibilityState === "hidden") return;
     let now;
@@ -260,5 +245,34 @@
   }, 1500);
 
   $("cloudSaveBtn").addEventListener("click", openSave);
+   
+  // Contexto para el checkout: proyecto guardado y sesión vigente.
+  window.__mwGetPaymentContext = async function () {
+    if (!current.id) {
+      throw new Error("Primero guardá este proyecto en la nube.");
+    }
+
+    if (dirty()) {
+      throw new Error(
+        "Hay cambios sin guardar. Esperá el guardado automático o guardá el proyecto manualmente."
+      );
+    }
+
+    const a = await getApi();
+    const { data, error } = await a.supabase.auth.getSession();
+
+    if (error) throw error;
+
+    const session = data && data.session;
+    if (!session || !session.access_token) {
+      throw new Error("Iniciá sesión para continuar.");
+    }
+
+    return {
+      projectId: current.id,
+      accessToken: session.access_token
+    };
+  };
+
   $("cloudListBtn").addEventListener("click", openList);
 })();
