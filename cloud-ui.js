@@ -163,17 +163,29 @@
   let autoPrompted = false;
   const autoStatus = el("p", "cl-msg");
   autoStatus.id = "mwAutoSaveStatus";
-  autoStatus.style.cssText = "position:fixed;right:10px;top:62px;z-index:8;background:#151F32dd;border:1px solid #25324b;border-radius:999px;padding:5px 9px;max-width:48vw;font-size:10px;opacity:.62;pointer-events:none;box-shadow:none;transition:opacity .25s";
+  
   autoStatus.textContent = "Guardado automático listo";
   document.body.append(autoStatus);
 
-  let fadeTimer = null;
+  autoStatus.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:80;background:#151F32eF;border:1px solid var(--line);border-radius:8px;padding:5px 8px;max-width:75vw;font-size:11px;line-height:1.25;box-shadow:0 4px 14px #0005;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .25s ease,transform .25s ease";
+  autoStatus.textContent = "";
+  document.body.append(autoStatus);
+  let autoHideTimer = null;
+
   function autoSay(text, error = false) {
-    clearTimeout(fadeTimer); autoStatus.textContent = text;
+    if (autoHideTimer) clearTimeout(autoHideTimer);
+    autoStatus.textContent = text;
     autoStatus.style.color = error ? "#ff9db1" : "var(--ink)";
-    autoStatus.style.opacity = error ? "1" : (text === "Guardando…" ? ".8" : ".62");
-    if (!error && text === "Guardado") fadeTimer = setTimeout(() => { autoStatus.style.opacity = ".12"; }, 1800);
+    autoStatus.style.opacity = "1";
+    autoStatus.style.transform = "translateY(0)";
+    if (!error && text !== "Guardando…") {
+      autoHideTimer = setTimeout(() => {
+        autoStatus.style.opacity = "0";
+        autoStatus.style.transform = "translateY(4px)";
+      }, 1500);
+    }
   }
+
   async function autosaveNow() {
     if (autoBusy || document.visibilityState === "hidden") return;
     let now;
