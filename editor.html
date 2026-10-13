@@ -1269,8 +1269,8 @@ modal.addEventListener("click", ev => { if (ev.target === modal) closePay(); });
 document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !modal.hidden) closePay(); });
 
 $("payMP").addEventListener("click", async () => {
+alert("El botón responde");
   const button = $("payMP");
-
   try {
     button.disabled = true;
     button.textContent = "Preparando pago...";
