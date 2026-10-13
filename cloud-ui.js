@@ -245,5 +245,34 @@
   }, 1500);
 
   $("cloudSaveBtn").addEventListener("click", openSave);
+   
+  // Contexto para el checkout: proyecto guardado y sesión vigente.
+  window.__mwGetPaymentContext = async function () {
+    if (!current.id) {
+      throw new Error("Primero guardá este proyecto en la nube.");
+    }
+
+    if (dirty()) {
+      throw new Error(
+        "Hay cambios sin guardar. Esperá el guardado automático o guardá el proyecto manualmente."
+      );
+    }
+
+    const a = await getApi();
+    const { data, error } = await a.supabase.auth.getSession();
+
+    if (error) throw error;
+
+    const session = data && data.session;
+    if (!session || !session.access_token) {
+      throw new Error("Iniciá sesión para continuar.");
+    }
+
+    return {
+      projectId: current.id,
+      accessToken: session.access_token
+    };
+  };
+
   $("cloudListBtn").addEventListener("click", openList);
 })();
