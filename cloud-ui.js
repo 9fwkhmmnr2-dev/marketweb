@@ -17,6 +17,40 @@
     return api;
   }
 
+window.__mwGetPaymentContext = async function () {
+  const a = await getApi();
+
+  await a.getCurrentUser();
+
+  const { data, error } = await a.supabase.auth.getSession();
+
+  if (error) throw error;
+
+  const session = data?.session;
+
+  if (!session?.access_token) {
+    throw new Error("Iniciá sesión para continuar.");
+  }
+
+  if (!current.id) {
+    throw new Error(
+      "Primero guardá tu proyecto en la nube."
+    );
+  }
+
+  if (dirty()) {
+    throw new Error(
+      "Tenés cambios sin guardar. Guardá el proyecto antes de pagar."
+    );
+  }
+
+  return {
+    projectId: current.id,
+    accessToken: session.access_token
+  };
+};
+
+   
   /* ---------- utilidades de interfaz (todo con textContent, nada de innerHTML) ---------- */
   const style = document.createElement("style");
   style.textContent = ".cl-box{text-align:left;max-width:440px;max-height:88dvh;overflow:auto}.cl-box h3{text-align:center}" +
