@@ -1258,7 +1258,9 @@ function exportDocument() {
   const a = document.createElement("a"); a.href = url; a.download = "mi-pagina-marketweb.html"; document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1500); showToast("Descarga iniciada. Abrí el archivo para probar tu página.");
 }
-const modal = $("payModal"), closePay = () => { modal.hidden = true; };
+const modal = $("payModal"),
+  openPay = () => { modal.hidden = false; },
+  closePay = () => { modal.hidden = true; };
 $("exportBtn").addEventListener("click", () => {
   openPay();
 });
