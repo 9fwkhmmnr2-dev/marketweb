@@ -190,7 +190,16 @@ export default async function handler(req, res) {
               },
             ],
             external_reference: orderId,
-            notification_url: `${appBase}/api/payment-webhook`,
+
+back_urls: {
+  success: `${appBase}/payment-return.html`,
+  pending: `${appBase}/payment-return.html`,
+  failure: `${appBase}/payment-return.html`,
+},
+
+auto_return: "approved",
+
+notification_url: `${appBase}/api/payment-webhook`,
           }),
         }
       );
