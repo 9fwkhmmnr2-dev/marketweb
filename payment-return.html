@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Verificando pago | MarketWeb</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: #09090b;
+      color: #f4f4f5;
+      font-family: system-ui, sans-serif;
+    }
+    main {
+      width: 100%;
+      max-width: 460px;
+      padding: 30px;
+      border: 1px solid #27272a;
+      border-radius: 18px;
+      background: #111113;
+      text-align: center;
+    }
+    h1 { font-size: 25px; margin-bottom: 12px; }
+    p { color: #a1a1aa; line-height: 1.6; }
+    button, .link {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font: inherit;
+      text-decoration: none;
+    }
+    button {
+      border: 0;
+      background: #fff;
+      color: #111;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .link { color: #d4d4d8; }
+    button:disabled { opacity: .5; cursor: wait; }
+    #status { margin-top: 18px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>MarketWeb</h1>
+    <p id="status" role="status" aria-live="polite">
+      Verificando el estado de tu pago...
+    </p>
+    <button id="retry" type="button" hidden>
+      Intentar verificar de nuevo
+    </button>
+    <p>
+      <a class="link" href="/editor.html">Volver al editor</a>
+    </p>
+  </main>
+
+  <script type="module">
+    import { createClient } from
+      "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL =
+      "https://msxmhgxsjlgfdlhirikj.supabase.co";
+    const SUPABASE_KEY =
+      "sb_publishable_6wS64xCMk4_073N2xbLJ4Q_1GYzALcq";
+
+    const supabase = createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    const statusEl = document.getElementById("status");
+    const retryButton = document.getElementById("retry");
+
+    const params = new URLSearchParams(location.search);
+    const orderId = params.get("external_reference");
+
+    const uuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    let busy = false;
+
+    function showRetry(message) {
+      statusEl.textContent = message;
+      retryButton.hidden = false;
+      retryButton.disabled = false;
+    }
+
+    async function verifyPayment() {
+      if (busy) return;
+      busy = true;
+      retryButton.disabled = true;
+      retryButton.hidden = true;
+      statusEl.textContent = "Verificando el pago con el servidor...";
+
+      try {
+        if (!orderId || !uuidPattern.test(orderId)) {
+          showRetry(
+            "No encontramos una referencia de pedido válida. Volvé al editor y contactá con soporte si ya pagaste."
+          );
+          return;
+        }
+
+        const { data, error } = await supabase.auth.getSession();
+
+        if (error) throw error;
+
+        const session = data.session;
+
+        if (!session?.access_token) {
+          showRetry(
+            "Necesitás iniciar sesión en MarketWeb con la misma cuenta que usaste para crear el pedido. Después volvé a esta página."
+          );
+          return;
+        }
+
+        const response = await fetch("/api/download", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ orderId })
+        });
+
+        if (!response.ok) {
+          let message =
+            "Todavía no pudimos verificar el pago. Si acabás de pagar, esperá un poco y volvé a intentar.";
+
+          try {
+            const result = await response.json();
+            if (typeof result.error === "string") {
+              message = result.error;
+            }
+          } catch {}
+
+          showRetry(message);
+          return;
+        }
+
+        const blob = await response.blob();
+
+        if (!blob.size || blob.size > 5 * 1024 * 1024) {
+          showRetry(
+            "La respuesta recibida no parece una descarga válida. Intentá verificar de nuevo."
+          );
+          return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "marketweb-plantilla.html";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        statusEl.textContent =
+          "¡Verificación completada! Si la descarga no comenzó, intentá verificar de nuevo.";
+        retryButton.hidden = false;
+        retryButton.disabled = false;
+
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      } catch {
+        showRetry(
+          "No pudimos conectar con el servicio de verificación. Revisá tu conexión e intentá de nuevo."
+        );
+      } finally {
+        busy = false;
+        retryButton.disabled = false;
+      }
+    }
+
+    retryButton.addEventListener("click", verifyPayment);
+    verifyPayment();
+  </script>
+</body>
+</html>
