@@ -1259,11 +1259,61 @@ function exportDocument() {
   setTimeout(() => URL.revokeObjectURL(url), 1500); showToast("Descarga iniciada. Abrí el archivo para probar tu página.");
 }
 const modal = $("payModal"), closePay = () => { modal.hidden = true; };
-$("exportBtn").addEventListener("click", () => { closePay(); exportDocument(); });
+$("exportBtn").addEventListener("click", () => {
+  openPay();
+});
 $("payClose").addEventListener("click", closePay);
 modal.addEventListener("click", ev => { if (ev.target === modal) closePay(); });
 document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !modal.hidden) closePay(); });
-$("payMP").addEventListener("click", () => showToast("El pago con Mercado Pago se conecta en la etapa del backend."));
+
+$("payMP").addEventListener("click", async () => {
+  const button = $("payMP");
+
+  try {
+    button.disabled = true;
+    button.textContent = "Preparando pago...";
+
+    if (typeof window.__mwGetPaymentContext !== "function") {
+      throw new Error("No se pudo verificar el proyecto. Recargá el editor e iniciá sesión.");
+    }
+
+    const context = await window.__mwGetPaymentContext();
+
+    const response = await fetch("/api/create-preference", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${context.accessToken}`
+      },
+      body: JSON.stringify({
+        projectId: context.projectId
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "No se pudo preparar el pago.");
+    }
+
+    const checkoutUrl = result.init_point || result.checkout_url;
+
+    if (
+      typeof checkoutUrl !== "string" ||
+      !checkoutUrl.startsWith("https://")
+    ) {
+      throw new Error("Mercado Pago no devolvió un enlace de pago válido.");
+    }
+
+    window.location.assign(checkoutUrl);
+  } catch (error) {
+    showToast(error.message || "No se pudo iniciar el pago.");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Pagar con Mercado Pago";
+  }
+});
+
 $("paySim").addEventListener("click", () => { closePay(); exportDocument(); });
 
 /* ---------- Puente para la nube (cloud-ui.js) ---------- */
