@@ -239,10 +239,14 @@ notification_url: `${appBase}/api/payment-webhook`,
   preference_id: preference.id,
   order_id: orderId,
 });
-  } catch {
-    // No devolver al navegador secretos ni errores internos.
-    return json(res, 500, {
-      error: "No pudimos preparar el pago. Revisá la configuración e intentá de nuevo.",
-    });
-  }
+
+} catch (error) {
+  console.error(
+    "CREATE_PREFERENCE_ERROR:",
+    error?.message || "UNKNOWN_ERROR"
+  );
+
+  return json(res, 500, {
+    error: "No pudimos preparar el pago. Revisá los registros del servidor.",
+  });
 }
