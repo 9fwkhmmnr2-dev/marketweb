@@ -226,9 +226,10 @@ export default async function handler(req, res) {
     );
 
     return json(res, 200, {
-      init_point: preference.init_point,
-      preference_id: preference.id,
-    });
+  init_point: preference.init_point,
+  preference_id: preference.id,
+  order_id: orderId,
+});
   } catch {
     // No devolver al navegador secretos ni errores internos.
     return json(res, 500, {
