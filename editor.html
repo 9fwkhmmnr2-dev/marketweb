@@ -1281,6 +1281,7 @@ alert("El botón responde");
 
     const context = await window.__mwGetPaymentContext();
 alert("Proyecto verificado");
+    alert("Voy a solicitar la creación del pago");
     const response = await fetch("/api/create-preference", {
       method: "POST",
       headers: {
